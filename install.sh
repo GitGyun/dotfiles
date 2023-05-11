@@ -108,9 +108,3 @@ if [ $? == 0 ]; then
     fi
     cp -r $DOT_DIR/jupyterlab_configs/* $HOME/.jupyter/lab/user-settings
 fi
-
-#==================================================#
-# set zsh to the default shell
-echo; echo '** set ZSH as default shell.'
-echo "exec zsh" >> $HOME/.bash_profile
-exec zsh
