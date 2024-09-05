@@ -1,8 +1,8 @@
 # dotfiles
 
 ```
-git clone https://github.com/GitGyun/.dotfiles.git ~/.dotfiles; 
-cd ~/.dotfiles; bash install.sh
+git clone https://github.com/GitGyun/.dotfiles.git ~/dotfiles; 
+cd ~/dotfiles; bash install.sh
 ```
 
 vim shortcuts
