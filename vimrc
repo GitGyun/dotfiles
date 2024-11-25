@@ -163,3 +163,4 @@ let g:ctrlp_custom_ignore = {
 " --
 
 set mouse=a
+set clipboard=unnamed
