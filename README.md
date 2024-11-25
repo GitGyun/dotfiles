@@ -1,7 +1,7 @@
 # dotfiles
 
 ```
-git clone https://github.com/GitGyun/.dotfiles.git ~/dotfiles; 
+git clone https://github.com/GitGyun/dotfiles.git ~/dotfiles; 
 cd ~/dotfiles; bash install.sh
 ```
 
