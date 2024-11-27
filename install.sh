@@ -20,13 +20,14 @@ ZSH_CUSTOM=$ZSH/custom
 #==================================================#
 source "$PWD/aliases/misc"
 if [ "$forced" != "true" ]; then
-    buo .Xmodmap .vim .vimrc .tmux.conf .aliases .gitconfig .gitconfig.secret .zshrc .oh-my-zsh .fzf
+    buo .Xmodmap .vim .vimrc .tmux.conf .aliases .gitconfig .gitconfig.secret .condarc .zshrc .oh-my-zsh .fzf
 fi
 ln -sf $DOT_DIR/Xmodmap $HOME/.Xmodmap # key mapping 
 ln -sf $DOT_DIR/vimrc $HOME/.vimrc # vim confnigs
 ln -sf $DOT_DIR/tmux.conf $HOME/.tmux.conf # tmux configs
 ln -sf $DOT_DIR/aliases $HOME/.aliases # zsh aliases
 ln -sf $DOT_DIR/gitconfig $HOME/.gitconfig # git configs
+ln -sf $DOT_DIR/condarc $HOME/.condarc # conda configs
 ln -sf $DOT_DIR/zshrc $HOME/.zshrc # zsh configs
 echo; echo '** download oh-my-zsh.'
 bash $DOT_DIR/install-omz.sh; 
