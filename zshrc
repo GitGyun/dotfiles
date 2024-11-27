@@ -9,7 +9,6 @@ export SHELL=$(which zsh)
 export ZSH=$HOME/.oh-my-zsh # oh-my-zsh
 export LC_CTYPE=en_US.UTF-8
 export LANG=en_US.UTF-8
-export LC_ALL=C
 export MYDOTFILES=$HOME/dotfiles
 
 
