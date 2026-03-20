@@ -667,6 +667,7 @@ main() {
     install_by_uv "black"
     install_by_uv "jedi_language_server"
     install_by_uv "python-lsp-server"
+    install_by_uv "pyright"
     install_by_uv "mobilint-qb-runtime"
     install_by_uv "pylatexenc"
     install_by_uv "jupyterlab"
