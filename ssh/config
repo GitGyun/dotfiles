@@ -72,3 +72,8 @@ Host mobi205
     User mobilint
     Port 8956
     # (device 정보 미기재)
+
+Host compiler
+    HostName 192.168.10.138
+    User compiler
+    Port 8768 
