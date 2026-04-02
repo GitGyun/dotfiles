@@ -132,6 +132,7 @@ bindkey "^[[1;3D" backward-word
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
+_CONDA_PREV_ENV="${CONDA_DEFAULT_ENV}"
 __conda_setup="$('/opt/conda/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__conda_setup"
@@ -143,6 +144,11 @@ else
     fi
 fi
 unset __conda_setup
+# restore previous conda env after re-source
+if [ -n "$_CONDA_PREV_ENV" ] && [ "$_CONDA_PREV_ENV" != "base" ]; then
+    conda activate "$_CONDA_PREV_ENV"
+fi
+unset _CONDA_PREV_ENV
 # <<< conda initialize <<<
 
 TZ='Asia/Seoul'; export TZ
