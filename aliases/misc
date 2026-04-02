@@ -56,7 +56,7 @@ function autoug(){
         return 1
     fi
     local gpus_per_pane=${1:-1}
-    local pane_idx=$(tmux display-message -p '#{pane_index}')
+    local pane_idx=$(tmux display-message -p -t "${TMUX_PANE}" '#{pane_index}')
     local start=$(( (pane_idx - 1) * gpus_per_pane ))
     local end=$(( start + gpus_per_pane - 1 ))
     if [ "$gpus_per_pane" -eq 1 ]; then
