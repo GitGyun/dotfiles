@@ -57,38 +57,45 @@ cp $DOT_DIR/fixes/cuda.zsh $HOME/.oh-my-zsh/custom/themes/spaceship-prompt/secti
 
 # modern cli tools
 echo; echo '** download modern cli tools.'
-## zoxide (smart cd)
-if ! command -v zoxide &> /dev/null; then
-    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-fi
-## eza (modern ls)
-if ! command -v eza &> /dev/null; then
-    cargo install eza 2>/dev/null || {
-        # fallback: download binary
+mkdir -p $HOME/.local/bin
+OS="$(uname -s)"
+
+if [ "$OS" = "Darwin" ]; then
+    # macOS: use Homebrew
+    if command -v brew &> /dev/null; then
+        brew install zoxide eza bat atuin 2>/dev/null
+    else
+        echo "WARNING: Homebrew not found. Install it first: https://brew.sh"
+        echo "Then run: brew install zoxide eza bat atuin"
+    fi
+else
+    # Linux: download binaries
+    ## zoxide (smart cd)
+    if ! command -v zoxide &> /dev/null; then
+        curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    fi
+    ## eza (modern ls)
+    if ! command -v eza &> /dev/null; then
         EZA_VERSION=$(curl -s https://api.github.com/repos/eza-community/eza/releases/latest | grep tag_name | cut -d '"' -f 4)
         curl -Lo /tmp/eza.tar.gz "https://github.com/eza-community/eza/releases/download/${EZA_VERSION}/eza_x86_64-unknown-linux-gnu.tar.gz"
         tar -xzf /tmp/eza.tar.gz -C /tmp
         mv /tmp/eza $HOME/.local/bin/eza
         rm -f /tmp/eza.tar.gz
-    }
-fi
-## bat (modern cat)
-if ! command -v bat &> /dev/null && ! command -v batcat &> /dev/null; then
-    BAT_VERSION=$(curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep tag_name | cut -d '"' -f 4)
-    curl -Lo /tmp/bat.deb "https://github.com/sharkdp/bat/releases/download/${BAT_VERSION}/bat_${BAT_VERSION#v}_amd64.deb"
-    sudo dpkg -i /tmp/bat.deb 2>/dev/null || {
-        # fallback: extract binary
+    fi
+    ## bat (modern cat)
+    if ! command -v bat &> /dev/null && ! command -v batcat &> /dev/null; then
+        BAT_VERSION=$(curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep tag_name | cut -d '"' -f 4)
         curl -Lo /tmp/bat.tar.gz "https://github.com/sharkdp/bat/releases/download/${BAT_VERSION}/bat-${BAT_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
         tar -xzf /tmp/bat.tar.gz -C /tmp
-        mv /tmp/bat-${BAT_VERSION}-x86_64-unknown-linux-gnu/bat $HOME/.local/bin/bat
-        rm -rf /tmp/bat.tar.gz /tmp/bat-${BAT_VERSION}-x86_64-unknown-linux-gnu
-    }
-    rm -f /tmp/bat.deb
+        mv "/tmp/bat-${BAT_VERSION}-x86_64-unknown-linux-gnu/bat" $HOME/.local/bin/bat
+        rm -rf /tmp/bat.tar.gz "/tmp/bat-${BAT_VERSION}-x86_64-unknown-linux-gnu"
+    fi
+    ## atuin (shell history)
+    if ! command -v atuin &> /dev/null; then
+        curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+    fi
 fi
-## atuin (shell history)
-if ! command -v atuin &> /dev/null; then
-    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
-fi
+
 ## fzf-tab (zsh plugin)
 if [ ! -d "${ZSH_CUSTOM}/plugins/fzf-tab" ]; then
     git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM}/plugins/fzf-tab
