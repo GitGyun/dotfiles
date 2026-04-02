@@ -50,6 +50,7 @@ HIST_STAMPS="mm/dd/yyyy"    # history with date stamps
 
 # zsh plugins
 plugins=(
+  fzf-tab
   zsh-syntax-highlighting
   zsh-autosuggestions
   copypath
@@ -99,13 +100,29 @@ done
 # fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# fzf preview
+# fzf preview (use bat if available)
 function fzfv()
 {
-    fzf --preview '[[ $(file --mime {}) =~ binary ]] &&
-                 echo {} is a binary file ||
-                 (cat {}) 2> /dev/null | head -500'
+    if command -v bat &> /dev/null; then
+        fzf --preview 'bat --style=numbers --color=always --line-range :500 {} 2>/dev/null || echo "{} is a binary file"'
+    elif command -v batcat &> /dev/null; then
+        fzf --preview 'batcat --style=numbers --color=always --line-range :500 {} 2>/dev/null || echo "{} is a binary file"'
+    else
+        fzf --preview '[[ $(file --mime {}) =~ binary ]] &&
+                     echo {} is a binary file ||
+                     (cat {}) 2> /dev/null | head -500'
+    fi
 }
+
+# zoxide (smart cd)
+if command -v zoxide &> /dev/null; then
+    eval "$(zoxide init zsh)"
+fi
+
+# atuin (shell history)
+if command -v atuin &> /dev/null; then
+    eval "$(atuin init zsh --disable-up-arrow)"
+fi
 
 # remove duplicates in PATH
 export PATH="$(echo -n $PATH | awk -v RS=: -v ORS=: '!arr[$0]++')"
@@ -129,3 +146,5 @@ unset __conda_setup
 # <<< conda initialize <<<
 
 TZ='Asia/Seoul'; export TZ
+
+. "$HOME/.atuin/bin/env"

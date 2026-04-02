@@ -1,0 +1,9 @@
+[credential]
+	helper = store
+[init]
+	defaultBranch = main
+[user]
+	email = kdgyun425@gmail.com
+	name = GitGyun
+[core]
+	fileMode = false

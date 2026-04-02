@@ -12,3 +12,5 @@ rm -rf $HOME/.vim
 rm -rf $HOME/.zshrc
 rm -rf $HOME/.gitconfig.secret
 rm -rf $HOME/.fzf*
+rm -rf $HOME/.local/share/atuin
+rm -rf $HOME/.config/atuin
