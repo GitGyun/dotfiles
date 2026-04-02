@@ -17,7 +17,7 @@ done
 # update fzf
 if [ -d "$HOME/.fzf" ]; then
     echo "Updating fzf..."
-    git -C "$HOME/.fzf" pull && "$HOME/.fzf/install" --all --no-bash --no-fish
+    git -C "$HOME/.fzf" pull && "$HOME/.fzf/install" --all --no-update-rc
 fi
 
 # update atuin
