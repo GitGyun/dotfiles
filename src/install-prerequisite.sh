@@ -251,7 +251,8 @@ install_rust() {
     fi
     log_install "rust" "rustup"
     if curl https://sh.rustup.rs -sSf | sh -s -- -y >/dev/null 2>&1; then
-        export PATH="$HOME/.cargo/bin:$PATH"
+        source "$HOME/.cargo/env"
+        rustup default stable >/dev/null 2>&1
         log_success "rust" "rustup"
         return 0
     fi
@@ -558,7 +559,7 @@ main() {
     curl -s "https://deb.nodesource.com/setup_${VERSION_NODE:-20}.x" 2>/dev/null | bash >/dev/null 2>&1
 
     # WakeMeOps repository (provides glab)
-    if ! grep -q "wakemeops" /etc/apt/sources.list.d/*.list 2>/dev/null; then
+    if ! grep -rq "wakemeops" /etc/apt/sources.list.d/ 2>/dev/null; then
         log_install "wakemeops-repo" "script"
         if curl -sSL "https://raw.githubusercontent.com/upciti/wakemeops/main/assets/install_repository" 2>/dev/null | bash >/dev/null 2>&1; then
             log_success "wakemeops-repo" "script"
@@ -595,8 +596,22 @@ main() {
     install_by_cargo "ast-grep" false
     
     log_section "Custom Tools"
-    install_by_script "shfmt" "https://webi.sh/shfmt" \
-        '[[ -f ~/.config/envman/PATH.env ]] && source ~/.config/envman/PATH.env'
+    if command -v shfmt >/dev/null 2>&1; then
+        log_skip "shfmt"
+    else
+        log_install "shfmt" "github binary"
+        local shfmt_arch="amd64"
+        [[ "$(uname -m)" == "aarch64" ]] && shfmt_arch="arm64"
+        local shfmt_os="linux"
+        [[ "$(uname -s)" == "Darwin" ]] && shfmt_os="darwin"
+        local shfmt_ver
+        shfmt_ver=$(curl -sSfL -o /dev/null -w "%{url_effective}" "https://github.com/mvdan/sh/releases/latest" 2>/dev/null | grep -oP 'v[\d.]+$')
+        if curl -sSfL "https://github.com/mvdan/sh/releases/download/${shfmt_ver}/shfmt_${shfmt_ver}_${shfmt_os}_${shfmt_arch}" -o /usr/local/bin/shfmt 2>/dev/null && chmod +x /usr/local/bin/shfmt; then
+            log_success "shfmt" "github binary"
+        else
+            log_error "shfmt" "github binary"
+        fi
+    fi
     install_by_script "zoxide" "https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh"
     # starship (cross-shell prompt)
     if ! command -v starship >/dev/null 2>&1; then

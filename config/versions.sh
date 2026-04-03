@@ -67,7 +67,6 @@ export VERSION_GPUSTAT="${VERSION_GPUSTAT:-latest}"
 export VERSION_PRE_COMMIT="${VERSION_PRE_COMMIT:-latest}"
 export VERSION_BLACK="${VERSION_BLACK:-latest}"
 export VERSION_ISORT="${VERSION_ISORT:-latest}"
-export VERSION_THEFUCK="${VERSION_THEFUCK:-latest}"
 
 #-------------------------------------------------#
 # Development Tools
@@ -113,7 +112,6 @@ print_version_info() {
     echo "  Luarocks:     $VERSION_LUAROCKS"
     echo "  Node:         $VERSION_NODE.x"
     echo "  VSCode C++:   $VERSION_VSCODE_CPPTOOLS"
-    echo "  thefuck:      $VERSION_THEFUCK"
     echo "======================================="
 }
 

@@ -7,6 +7,7 @@ export MYDOTFILES="$HOME/.dotfiles"
 typeset -U PATH  # -U ensures unique entries only
 path=(
     "$HOME/.local/bin"
+    "$HOME/.atuin/bin"
     "$HOME/bin"
     "$HOME/.bun/bin"
     "$HOME/.cargo/bin"

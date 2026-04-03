@@ -9,7 +9,7 @@ alias vimconflicts='vim $(git diff --name-only --diff-filter=U)'
 alias tmux='tmux -u'
 
 # Modern CLI replacements
-alias ls='eza'
+alias ls='eza --icons'
 alias df='duf'
 alias bat='batcat'
 if [[ $- == *i* ]]; then

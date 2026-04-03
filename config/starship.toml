@@ -13,7 +13,7 @@ style_user = "bold green"
 format = "[$user]($style) "
 
 [directory]
-style = "bold #5fd7ff"
+style = "bold #00afd7"
 truncation_length = 5
 truncate_to_repo = false
 
@@ -27,6 +27,9 @@ disabled = true
 format = "[$symbol$environment]($style) "
 style = "bold yellow"
 
+[container]
+disabled = true
+
 [python]
 disabled = true
 
@@ -39,6 +42,14 @@ disabled = true
 [env_var.CUDA_VISIBLE_DEVICES]
 variable = "CUDA_VISIBLE_DEVICES"
 format = "[| cuda:$env_value](bold #af87ff) "
+
+[env_var.HABANA_VISIBLE_DEVICES]
+variable = "HABANA_VISIBLE_DEVICES"
+format = "[| habana:$env_value](bold #af87ff) "
+
+[env_var.PYTHONPATH]
+variable = "PYTHONPATH"
+format = "[| pypath:$env_value](bold #ffaf00) "
 
 [env_var.G]
 disabled = true
