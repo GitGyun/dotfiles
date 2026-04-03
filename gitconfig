@@ -1,0 +1,9 @@
+[credential]
+	helper = "!f() { /home/kdgyun425/.vscode-server/bin/cfbea10c5ffb233ea9177d34726e6056e89913dc/node /tmp/vscode-remote-containers-b9fb8aba-c40d-429f-ba16-a35dbdb35017.js git-credential-helper $*; }; f"
+[init]
+	defaultBranch = main
+[user]
+	email = kdgyun425@gmail.com
+	name = GitGyun
+[core]
+	fileMode = false

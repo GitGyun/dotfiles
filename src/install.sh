@@ -3,7 +3,11 @@ set -euo pipefail
 
 # When running under sudo, use the real user's HOME directory
 if [[ -n "${SUDO_USER:-}" ]]; then
-    HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+    if command -v getent &>/dev/null; then
+        HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+    else
+        HOME=$(eval echo "~$SUDO_USER")
+    fi
     export HOME
 fi
 
@@ -34,7 +38,10 @@ install_minimal() {
 
     echo
     echo '** [MINIMAL] Linking configurations...'
-    ln -sf "$DOT_DIR/assets/Xmodmap" "$HOME/.Xmodmap"
+    # Xmodmap (Linux only)
+    if [[ "$(uname -s)" != "Darwin" ]]; then
+        ln -sf "$DOT_DIR/assets/Xmodmap" "$HOME/.Xmodmap"
+    fi
 
     # nvim configuration
     rm -rf "$HOME/.config/nvim"
@@ -83,11 +90,11 @@ install_standard() {
     nvim --headless "+TSUninstall python" -c "q" || true
 
     echo
-    echo '** [STANDARD] Setting up Codeium...'
+    echo '** [STANDARD] Setting up Codeium cache...'
     mkdir -p ~/.cache/nvim/codeium
     chown -R "$(whoami):$(whoami)" ~/.cache/nvim/codeium
-    echo '{"api_key": "sk-ws-01-dnDT0n46kqpivATCL6dOA65i_UTyF0y5ryAgBHoFGWgYPzDYFEzj14nutfqo8ACRwq_7p0V772sQ9VcosYnwWCqnjvouQQ"}' > ~/.cache/nvim/codeium/config.json
     chmod -R 755 ~/.cache/nvim/codeium
+    echo '  Run :Codeium Auth in nvim to set up your API key.'
 }
 
 install_full() {
@@ -167,13 +174,15 @@ esac
 #==================================================#
 # Finalize
 #==================================================#
-echo
-echo '** Fixing DNS resolution (Docker containers)...'
-zsh -c "source '$DOT_DIR/zsh/zsh.d/10-functions.zsh' && fix-dns --force" || true
+if [[ "$(uname -s)" != "Darwin" ]]; then
+    echo
+    echo '** Fixing DNS resolution (Docker containers)...'
+    zsh -c "source '$DOT_DIR/zsh/zsh.d/10-functions.zsh' && fix-dns --force" || true
 
-echo
-echo '** Setting ZSH as default shell...'
-locale-gen en_US.UTF-8 || true
+    echo
+    echo '** Setting ZSH as default shell...'
+    locale-gen en_US.UTF-8 || true
+fi
 grep -q "exec zsh" "$HOME/.bash_profile" 2>/dev/null || echo "exec zsh" >> "$HOME/.bash_profile"
 
 # Fix ownership when running under sudo

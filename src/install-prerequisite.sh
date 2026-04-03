@@ -632,8 +632,28 @@ main() {
     install_by_script "shfmt" "https://webi.sh/shfmt" \
         '[[ -f ~/.config/envman/PATH.env ]] && source ~/.config/envman/PATH.env'
     install_by_script "zoxide" "https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh"
-    install_by_script "starship" "https://starship.rs/install.sh" "" "sh -s -- -y"
-    install_by_script "atuin" "https://setup.atuin.sh" "" "bash"
+    # starship (cross-shell prompt)
+    if ! command -v starship >/dev/null 2>&1; then
+        log_install "starship" "script"
+        if curl -sSfL https://starship.rs/install.sh 2>/dev/null | sh -s -- -y >/dev/null 2>&1; then
+            log_success "starship" "script"
+        else
+            log_error "starship" "script"
+        fi
+    else
+        log_skip "starship"
+    fi
+    # atuin (shell history)
+    if ! command -v atuin >/dev/null 2>&1; then
+        log_install "atuin" "script"
+        if curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh 2>/dev/null | bash >/dev/null 2>&1; then
+            log_success "atuin" "script"
+        else
+            log_error "atuin" "script"
+        fi
+    else
+        log_skip "atuin"
+    fi
     install_by_script "bun" "https://bun.sh/install"
 
     log_section "Neovim"
