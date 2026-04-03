@@ -2,6 +2,8 @@
 
 Personal development environment configuration using Neovim, Zsh, Tmux, and AI tools.
 
+Forked from https://github.com/SeongwoongCho/dotfiles / https://github.com/1Konny/dotfiles
+
 ## Quick Install
 
 ```bash
