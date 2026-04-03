@@ -1,4 +1,4 @@
-# dotfiles
+# .dotfiles
 
 Personal development environment for Linux and macOS. Based on [SeongwoongCho/dotfiles](https://github.com/SeongwoongCho/dotfiles) with custom extensions for ML/DL workflows.
 
