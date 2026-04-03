@@ -8,8 +8,7 @@ set -uo pipefail
 #   bash src/install-secrets.sh          # fetch & install
 #   bash src/install-secrets.sh --save   # collect & push
 #
-# Repo: Create a private repo on GitLab first:
-#   https://git.mobilint.com/projects/new
+# Repo: Create a private repo on GitHub first
 #==================================================#
 
 SECRETS_REPO="${DOTFILES_SECRETS_REPO:-git@github.com:GitGyun/dotfiles-secret.git}"
@@ -133,7 +132,7 @@ save_secrets() {
             log_success "Secrets pushed to $SECRETS_REPO"
         else
             log_error "Push failed. Make sure the remote repo exists and you have access."
-            log_info "Create it at: https://git.mobilint.com/projects/new"
+            log_info "Create the private repo first, then retry."
             return 1
         fi
     fi

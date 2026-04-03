@@ -11,7 +11,6 @@ path=(
     "$HOME/.bun/bin"
     "$HOME/.cargo/bin"
     "$MYDOTFILES/tmux"
-    "$HOME/.mbltmon/build/src/mbltmon"
     /usr/local/bin
     /usr/local/cuda/bin
     /usr/bin

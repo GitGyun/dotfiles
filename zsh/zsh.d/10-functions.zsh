@@ -267,9 +267,8 @@ function fuzzyvim() {
 # Device visibility control for hardware accelerators:
 # - NVIDIA GPU:       CUDA_VISIBLE_DEVICES
 # - Intel Gaudi/HPU:  HABANA_VISIBLE_DEVICES
-# - Mobilint NPU:     MACCEL_VISIBLE_DEVICES
 #
-# Short aliases: ug (GPU), uh (HPU), um (Mobilint NPU)
+# Short aliases: ug (GPU)
 # Selected devices are displayed in the shell prompt (see zsh-theme).
 # =============================================================================
 

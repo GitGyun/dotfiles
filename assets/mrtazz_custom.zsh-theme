@@ -26,12 +26,6 @@ function habana_prompt_info(){
     fi
 }
 
-function maccel_prompt_info(){
-    if [[ -n "$MACCEL_VISIBLE_DEVICES" ]]; then
-        echo " | %{$FG[141]%}maccel:${MACCEL_VISIBLE_DEVICES}"
-    fi
-}
-
 function pythonpath_prompt_info(){
     if [[ -n "$PYTHONPATH" ]]; then
         echo " | %{$FG[214]%}pypath:${PYTHONPATH/#$HOME/~}"
@@ -46,7 +40,7 @@ $(conda_prompt_info)\
 %{$FG[255]%} in \
 %{$FG[153]%}${PWD/#$HOME/~}\
 %{$reset_color%}\
- $(git_prompt_info)$(cuda_prompt_info)$(habana_prompt_info)$(maccel_prompt_info)$(pythonpath_prompt_info)
+ $(git_prompt_info)$(cuda_prompt_info)$(habana_prompt_info)$(pythonpath_prompt_info)
 %{$fg_bold[blue]%}$ '
 
 ZSH_THEME_CONDA_PREFIX="%{$FG[226]%}("

@@ -495,40 +495,6 @@ optimize_dns() {
     fi
 }
 
-install_mobilint() {
-    if dpkg -s mobilint-cli &>/dev/null; then
-        local installed candidate
-        installed=$(dpkg -s mobilint-cli 2>/dev/null | awk '/^Version:/{print $2}')
-        candidate=$(apt-cache policy mobilint-cli 2>/dev/null | awk '/Candidate:/{print $2}')
-        if [[ "$installed" == "$candidate" ]]; then
-            log_skip "mobilint-cli ($installed)"
-            return 0
-        fi
-        log_info "mobilint-cli $installed installed, but $candidate available"
-    fi
-    log_install "mobilint-cli" "mobilint repo"
-
-    # Add GPG key
-    DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates >/dev/null 2>&1
-    install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://dl.mobilint.com/apt/gpg.pub -o /etc/apt/keyrings/mblt.asc 2>/dev/null
-    chmod a+r /etc/apt/keyrings/mblt.asc
-
-    # Add repo
-    printf "%s\n" \
-        "deb [signed-by=/etc/apt/keyrings/mblt.asc] https://dl.mobilint.com/apt stable multiverse" \
-        "deb [signed-by=/etc/apt/keyrings/mblt.asc] https://dl.mobilint.com/apt $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") multiverse" |
-        tee /etc/apt/sources.list.d/mobilint.list >/dev/null
-
-    apt-get update >/dev/null 2>&1
-    if DEBIAN_FRONTEND=noninteractive apt-get install -y mobilint-cli >/dev/null 2>&1; then
-        log_success "mobilint-cli" "mobilint repo"
-        return 0
-    fi
-    log_error "mobilint-cli" "mobilint repo"
-    return 1
-}
-
 install_kitty_magick() {
     # kitty: always run installer (handles updates natively)
     log_install "kitty" "installer script"
