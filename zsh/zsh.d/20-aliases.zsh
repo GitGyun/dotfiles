@@ -47,13 +47,10 @@ alias pylist='ps -ef | grep "python"'
 # Claude Code (auto-update OMC before launch)
 alias claude='omc update && IS_SANDBOX=1 command claude --dangerously-skip-permissions'
 
-# GPU/NPU/HPU monitoring
+# GPU monitoring
 alias ug='usegpu'
 alias gpu="watch --color -n.5 gpustat --color"
 alias gpusmi="watch -n.5 nvidia-smi"
-alias npu="watch --color -n.5 npustat --color"
-alias uh='usehpu'
-alias hpusmi="watch -n.5 hl-smi"
 
 # CUDA version info
 alias cudav='nvcc --version'
@@ -65,12 +62,6 @@ function gdown(){
     wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$CONFIRM&id=$1" -O $2
     rm -rf /tmp/cookies.txt
 }
-
-# CMake presets (Mobilint)
-alias cmakeauto='cmake .. -DPRODUCT=aries2-v4 -DDRIVER_TYPE=aries2 -DVENDOR=mobilint -G Ninja -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold" -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"'
-alias cmakeauto_r='cmake .. -DPRODUCT=regulus-v4 -DDRIVER_TYPE=regulus -DVENDOR=mobilint -G Ninja -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=mold" -DCMAKE_SHARED_LINKER_FLAGS="-fuse-ld=mold -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"'
-alias cmo='cmakeauto'
-alias cmo_r='cmakeauto_r'
 
 # Dotfiles management
 alias dotup='bash $MYDOTFILES/src/update.sh'

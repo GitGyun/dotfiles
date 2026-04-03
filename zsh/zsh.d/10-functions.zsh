@@ -308,37 +308,6 @@ function autoug(){
     echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES (pane $pane_idx)"
 }
 
-# HPU device selection (Intel Gaudi / Habana)
-# Usage: uh [device_ids]
-#   uh 0      - Use HPU 0 only
-#   uh 0,1    - Use HPUs 0 and 1
-#   uh        - Clear selection (use all available)
-function usehpu() {
-    if [ -n "$1" ]; then
-        export HABANA_VISIBLE_DEVICES="$1"
-    else
-        unset HABANA_VISIBLE_DEVICES
-    fi
-}
-alias uh='usehpu'
-
-# Mobilint NPU device selection
-# Usage: um [device_ids]
-#   um 0      - Use NPU 0 only
-#   um 0,1    - Use NPUs 0 and 1
-#   um        - Clear selection (use all available)
-#
-# MACCEL_VISIBLE_DEVICES: Environment variable for Mobilint Inc. NPU accelerators.
-# Similar to CUDA_VISIBLE_DEVICES, this controls which NPU devices are visible
-# to Mobilint's runtime and frameworks.
-function usemaccel() {
-    if [ -n "$1" ]; then
-        export MACCEL_VISIBLE_DEVICES="$1"
-    else
-        unset MACCEL_VISIBLE_DEVICES
-    fi
-}
-alias um='usemaccel'
 
 # PYTHONPATH setting
 # Usage: up [path]
@@ -386,12 +355,8 @@ function dothelp() {
         _header "Accelerator & Environment"
         _cmd "autoug [n]" "Auto GPU per tmux pane (n=GPUs/pane)"
         _cmd "ug <ids>" "Set CUDA_VISIBLE_DEVICES (prompt: cuda:X)"
-        _cmd "uh <ids>" "Set HABANA_VISIBLE_DEVICES (prompt: habana:X)"
-        _cmd "um <ids>" "Set MACCEL_VISIBLE_DEVICES (prompt: maccel:X)"
         _cmd "up <path>" "Set PYTHONPATH (prompt: pypath:~)"
         _cmd "gpu" "Watch gpustat (NVIDIA)"
-        _cmd "npu" "Watch npustat (Mobilint)"
-        _cmd "hpusmi" "Watch hl-smi (Intel Gaudi)"
     fi
 
     # Common Aliases

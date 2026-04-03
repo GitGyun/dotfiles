@@ -684,21 +684,13 @@ main() {
     install_by_uv "pynvim"
     install_by_uv "isort"
     install_by_uv "gpustat"
-    install_by_uv "npustat" --editable "$HOME/.dotfiles/npustat"
     install_by_uv "pre-commit"
     install_by_uv "black"
     install_by_uv "jedi_language_server"
     install_by_uv "python-lsp-server"
     install_by_uv "pyright"
-    install_by_uv "mobilint-qb-runtime"
     install_by_uv "pylatexenc"
     install_by_uv "jupyterlab"
-
-    # log_section "VSCode C++ Tools"
-    # install_vscode_cpptools
-
-    log_section "Mobilint"
-    install_mobilint
 
     print_summary
 }
