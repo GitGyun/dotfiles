@@ -308,6 +308,28 @@ function autoug(){
 }
 
 
+# Split tmux into 8 panes (2 columns x 4 rows)
+# Usage: split8
+function split8() {
+    if [ -z "$TMUX" ]; then
+        echo "Not in a tmux session."
+        return 1
+    fi
+    tmux split-window -h
+    tmux select-pane -L
+    tmux split-window -v
+    tmux split-window -v
+    tmux select-pane -t 1
+    tmux split-window -v
+    tmux select-pane -R
+    tmux split-window -v
+    tmux split-window -v
+    tmux select-pane -t 5
+    tmux split-window -v
+    tmux select-layout tiled
+    tmux select-pane -t 1
+}
+
 # PYTHONPATH setting
 # Usage: up [path]
 #   up .        - Set PYTHONPATH to current directory
