@@ -1,121 +1,312 @@
 # dotfiles
 
-Personal development environment configuration using Neovim, Zsh, Tmux, and AI tools.
+Personal development environment for Linux and macOS. Based on [SeongwoongCho/dotfiles](https://github.com/SeongwoongCho/dotfiles) with custom extensions for ML/DL workflows.
 
-Forked from https://github.com/SeongwoongCho/dotfiles / https://github.com/1Konny/dotfiles
+---
 
-## Quick Install
+## Quick Start
 
 ```bash
-git clone git@github.com:SeongwoongCho/dotfiles.git ~/.dotfiles
+git clone git@github.com:GitGyun/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-bash src/install.sh [profile]
-gitsetup --name "Your Name" --email "your@email.com"
+bash src/install.sh              # full profile (default)
+bash src/install.sh standard     # without AI tools
+bash src/install.sh minimal      # zsh + nvim + git only
 ```
 
-### Installation Profiles
-
-| Profile | Description | Use Case |
-|---------|-------------|----------|
-| `minimal` | zsh + nvim + git | Basic dev environment |
-| `standard` | + tmux + LSP + plugins | Full local dev |
-| `full` | + Claude Code + all LSPs | **Default** - Complete environment |
+### Existing Environment Update
 
 ```bash
-# Examples
-bash src/install.sh minimal   # Lightweight setup
-bash src/install.sh standard  # Without AI tools
-bash src/install.sh           # Full (default)
+dotup                            # git pull + relink + plugin updates
+dotup-full                       # + system packages
 ```
 
-### Docker Install
+### Secrets Management
 
 ```bash
-docker build \
-  --build-arg USER_ID=$(id -u) \
-  --build-arg USER_NAME=$(id -un) \
-  -t ${IMAGE_NAME} .
-
-bash run_docker.sh ${IMAGE_NAME} ${CONTAINER_NAME}
+# First time: create a private repo at github.com/GitGyun/dotfiles-secret
+dotsecret                        # push local secrets to private repo
 ```
 
-## Project Structure
+Managed secrets: `~/.gitconfig.secret`, `~/.ssh/config`, `~/.config/glab-cli/config.yml`
+
+---
+
+## Installation Profiles
+
+| Profile | What's Included |
+|---------|----------------|
+| **minimal** | zsh + oh-my-zsh + zinit + starship + neovim + git + secrets |
+| **standard** | minimal + tmux + LSP servers + Codeium AI + plugins |
+| **full** | standard + Claude Code + oh-my-claudecode + LSP plugins |
+
+---
+
+## Architecture
 
 ```
 ~/.dotfiles/
-├── nvim/                    # Neovim configuration (Lazy.nvim)
-│   ├── init.lua             # Entry point
-│   └── lua/
-│       ├── config/          # Core settings (keymaps, options)
-│       └── plugins/         # Plugin configurations
-├── zsh/
-│   ├── zshrc                # Main shell config
-│   └── zsh.d/               # Modular shell scripts
-│       ├── 10-functions.zsh # Utility functions
-│       ├── 20-aliases.zsh   # Common aliases
-│       └── 30-git.zsh       # Git shortcuts
-├── tmux/
-│   ├── tmux.conf            # Tmux configuration
-│   └── statusbar.tmux       # Dynamic status bar
-├── git/
-│   └── gitconfig            # Git settings
-├── ssh/
-│   └── config               # SSH configuration
-├── assets/                  # Themes, colors, keymaps
-├── config/                  # Version management
-│   ├── versions.sh          # Default versions + auto-detection
-│   └── versions.d/          # Environment-specific overrides
-│       ├── ubuntu-20.04.sh
-│       ├── ubuntu-22.04.sh
-│       ├── ubuntu-24.04.sh
-│       └── local.sh         # Local overrides (gitignored)
-└── src/                     # Installation scripts
-    ├── install.sh           # Main installer (profile-based)
-    ├── install-prerequisite.sh  # Dependencies
-    ├── install-secrets.sh   # Secrets fetch/save (private repo)
-    ├── install-omz.sh       # Oh-My-Zsh
-    ├── update.sh            # Update without rebuilding
-    └── cleanse.sh           # Cleanup script
+  zsh/
+    zshrc              -> ~/.zshrc
+    zsh.d/
+      10-functions.zsh -> ~/.zsh.d/   (utility functions)
+      20-aliases.zsh                   (common aliases)
+      30-git.zsh                       (git aliases/functions)
+  zshenv               -> ~/.zshenv   (unset TMOUT)
+  nvim/                -> ~/.config/nvim/
+  tmux/
+    tmux.conf          -> ~/.tmux.conf
+    statusbar.tmux     -> ~/.tmux/statusbar.tmux
+  git/
+    gitconfig          -> ~/.gitconfig
+  config/
+    starship.toml      -> ~/.config/starship.toml
+    versions.sh        (package version management)
+  src/
+    install.sh         (main installer)
+    install-prerequisite.sh (system packages)
+    install-secrets.sh (private repo sync)
+    install-omz.sh     (oh-my-zsh)
+    update.sh          (updater)
+  assets/
+    LS_COLORS, Xmodmap, mrtazz_custom.zsh-theme
 ```
 
-## Core Features
+---
 
-### Terminal Environment
-- **Shell**: Zsh with Oh-My-Zsh + zplug
-- **Multiplexer**: Tmux with TPM (prefix: `Ctrl-A`)
-- **Theme**: mrtazz_custom + Oceanic Next
-- **Auto-reload**: Changes to zshrc, themes, and zsh.d modules are automatically detected and applied
+## Shell (Zsh)
 
-### Zsh Plugins
-- `alias-tips` - Reminds you of aliases
-- `zsh-syntax-highlighting` - Command highlighting
-- `zsh-autosuggestions` - Fish-like suggestions
-- `fzf` + `fd` - Fuzzy finding
-- `zoxide` - Smarter cd command
+### Prompt: Starship
 
-### Modern CLI Tools
-| Original | Replacement | Description |
-|----------|-------------|-------------|
-| `ls` | `eza` | Modern ls with colors and icons |
-| `cd` | `z` (zoxide) | Smart directory jumping |
-| `cat` | `batcat` | Syntax highlighting |
-| `df` | `duf` | Disk usage with better UI |
-| `du` | `dust` | Disk usage tree view |
-| `grep` | `rg` (ripgrep) | Faster grep |
-| `find` | `fd` | Faster find |
-| `git diff` | `delta` | Side-by-side diffs with syntax highlighting |
-| - | `jq` | JSON processor |
-| - | `gh` | GitHub CLI |
-| - | `glab` | GitLab CLI |
-| - | `ast-grep` | AST-based code search/replace |
-| - | `shfmt` | Shell script formatter |
-| - | `bun` | Fast JavaScript runtime |
+Cross-shell prompt configured in `config/starship.toml`:
+- Username (always shown, green)
+- Directory (cyan, 5-level truncation)
+- Git branch (red)
+- Conda environment (yellow)
+- `CUDA_VISIBLE_DEVICES` (purple, shown when set)
+- Command duration (> 5s)
+- Hostname (SSH only)
 
-### Git Configuration
+### Plugin Manager: Zinit
 
-Git uses `delta` as the pager for beautiful side-by-side diffs with the `forest-night` theme.
+| Plugin | Loading | Description |
+|--------|---------|-------------|
+| **alias-tips** | sync | Shows alias hints when you type a full command |
+| **fzf-tab** | sync | Replaces Tab completion with fzf interface |
+| **zsh-autosuggestions** | async | Fish-like command suggestions |
+| **zsh-syntax-highlighting** | async | Syntax highlighting for commands |
 
-**Gitconfig aliases:**
+### Key Tools
+
+| Tool | Replaces | Usage |
+|------|----------|-------|
+| **zoxide** | `cd` | `z <keyword>`, `zi` (interactive) |
+| **atuin** | `Ctrl+R` | Smart history search (SQLite, per-directory context) |
+| **eza** | `ls` | `ls`, aliased globally |
+| **bat** | `cat` | `bat`, aliased as `batcat` |
+| **fzf + fd** | `find` | Fuzzy file finding, `fuzzyvim` to open in nvim |
+| **duf** | `df` | `df`, aliased globally |
+
+### Features
+
+- **Auto-reload**: zshrc/zsh.d changes are detected and reloaded automatically at each prompt
+- **Conda env preservation**: `source ~/.zshrc` preserves your active conda environment
+- **Timezone**: Asia/Seoul
+- **TMOUT**: Disabled via zshenv (prevents SSH session timeout)
+
+---
+
+## Aliases
+
+### Editor & Terminal
+
+| Alias | Command |
+|-------|---------|
+| `vim` | `nvim` |
+| `tmux` | `tmux -u` (UTF-8 mode) |
+
+### Jupyter
+
+| Alias | Command |
+|-------|---------|
+| `jl` / `jla` | `jupyter lab` / `jupyter lab --ip 0.0.0.0` |
+| `jn` / `jna` | `jupyter notebook` / `jupyter notebook --ip 0.0.0.0` |
+
+### GPU Management
+
+| Alias | Description |
+|-------|-------------|
+| `ug <ids>` | Set `CUDA_VISIBLE_DEVICES` (e.g., `ug 0,1`) |
+| `autoug [n]` | Auto-assign GPU per tmux pane (`$G` shorthand set) |
+| `gpu` | Watch gpustat |
+| `gpusmi` | Watch nvidia-smi |
+| `cudav` | Show CUDA version |
+
+**autoug** assigns GPUs based on tmux pane index:
+
+```bash
+# 8 panes, 8 GPUs -> each pane runs autoug
+autoug              # pane1->GPU0, pane2->GPU1, ... pane8->GPU7
+autoug 2            # pane1->0,1  pane2->2,3  (2 GPUs per pane)
+
+# Use $G as shorthand
+python main.py --shard_id $G
+```
+
+Works with `prefix + e` (synchronize-panes) -- each pane gets its own GPU.
+
+### Tensorboard & Visdom
+
+| Alias | Usage |
+|-------|-------|
+| `tsb <port> <logdir>` | Start tensorboard |
+| `tsbs <port> <logdir>` | Start tensorboard (no image/scalar sampling) |
+| `vis` | Start visdom server |
+
+### Monitoring
+
+| Alias | Description |
+|-------|-------------|
+| `tblist` | List tensorboard processes |
+| `pylist` | List python processes |
+| `jnlist` | List jupyter notebooks |
+
+### Git
+
+| Alias | Command |
+|-------|---------|
+| `ga` | `git add` |
+| `gst` | `git status` |
+| `gd` | `git diff` |
+| `gcm` | `git commit -m` |
+| `gps` / `gpl` | `git push` / `git pull` |
+| `gclone <user> <repo>` | Clone from GitHub |
+| `gra <user> <repo>` | Add remote origin |
+| `gitsetup --name <n> --email <e>` | Configure git user |
+
+### Utilities
+
+| Alias/Function | Description |
+|----------------|-------------|
+| `du` | `du -hd 1` |
+| `gdown <id> <name>` | Download from Google Drive |
+| `howmany <dir> "<pattern>"` | Count files matching pattern |
+| `pyclean` | Remove `__pycache__` files |
+| `up <path>` | Set PYTHONPATH (clear with `up`) |
+| `fix-dns` | Fix slow DNS with dnsmasq split DNS |
+| `dothelp` | Show all aliases, functions, keybindings |
+
+### Dotfiles Management
+
+| Alias | Description |
+|-------|-------------|
+| `dotup` | Update dotfiles (git + plugins) |
+| `dotup-full` | Full update (+ system packages) |
+| `dotsecret` | Save secrets to private repo |
+| `dotcd` | cd to ~/.dotfiles |
+
+---
+
+## Neovim
+
+Lazy.nvim plugin manager with full LSP, AI completion, and modern editing.
+
+### Colorscheme
+
+**OceanicNext** (default). **Sonokai** (andromeda) available as alternative -- edit `nvim/lua/plugins/sonokai.lua` to enable.
+
+### Plugins
+
+| Plugin | Purpose |
+|--------|---------|
+| **telescope** | Fuzzy finder (`Ctrl+P` files, `Ctrl+O` grep) |
+| **nvim-cmp** | Autocompletion (LSP + Codeium AI + snippets) |
+| **treesitter** | Syntax highlighting |
+| **mason + mason-lspconfig** | LSP auto-installer (clangd, pylsp, jedi, lua_ls, bashls) |
+| **conform.nvim** | Format on save (black, shfmt, clang-format, stylua) |
+| **gitsigns** | Git diff in gutter + inline blame |
+| **nvim-tree** | File explorer (`"` to toggle) |
+| **barbar** | Buffer tabs (bubblegum theme) |
+| **codeium** | AI code completion |
+| **auto-session** | Automatic session save/restore |
+| **snacks.nvim** | Dashboard, indent guides, notifications |
+| **yanky** | Yank history (`<leader>p`) |
+| **markview** | Markdown preview |
+
+### Keybindings (Leader: `,`)
+
+| Key | Action |
+|-----|--------|
+| `,s` | Save file |
+| `,R` | Reload config |
+| `@` | Clear search highlight |
+| `Ctrl+P` | Find files (Telescope) |
+| `Ctrl+O` | Live grep (Telescope) |
+| `[b` / `]b` | Previous/Next buffer |
+| `,d` | Go to definition |
+| `,g` | Go back |
+| `,b` / `,v` | Insert ipdb breakpoint above/below |
+| `,p` | Yank history |
+| `"` | Toggle file explorer |
+| `F2` | LSP rename |
+| `F4` | Code action |
+| `F8` | Toggle paste mode |
+| `F9` | Toggle line numbers + indent guides |
+| `y` / `yy` | Yank to system clipboard (OSC52) |
+
+---
+
+## Tmux
+
+Prefix: `Ctrl+A`
+
+### Dynamic Statusbar
+
+Real-time CPU, RAM, and GPU usage with color gradients:
+- **CPU** (red shades): idle to 80%+ heat
+- **RAM** (orange shades): low to 90%+ warning
+- **GPU** (green shades): idle to 90%+ full load
+- Date/time on the right
+
+### Key Bindings
+
+| Key | Action |
+|-----|--------|
+| `v` | Vertical split |
+| `s` | Horizontal split |
+| `h/j/k/l` | Navigate panes |
+| `Ctrl+h/j/k/l` | Navigate (vim-aware) |
+| `c` | New window |
+| `0-9` | Select window |
+| `e` | Toggle sync mode (with color change) |
+| `r` | Reload config |
+| `> / <` | Resize pane width |
+| `+ / -` | Resize pane height |
+| `Esc` / `Enter` | Enter copy mode |
+| `A` | Rename window |
+
+### Plugins (TPM)
+
+| Plugin | Key | Description |
+|--------|-----|-------------|
+| **tmux-resurrect** | | Session save/restore across reboots |
+| **tmux-continuum** | | Auto-save sessions |
+| **extrakto** | `prefix+Tab` | Extract text from pane |
+| **tmux-thumbs** | `prefix+F` | Vimium-style text copy from screen |
+| **tmux-fzf** | `prefix+Ctrl+F` | fzf search for sessions/windows/panes |
+| **tmux-sessionx** | `prefix+o` | Session manager (create/switch/delete) |
+| **prefix-highlight** | | Shows when prefix is active |
+
+---
+
+## Git
+
+### Delta (diff pager)
+
+Side-by-side diffs with `forest-night` theme (gruvbox-dark syntax). Enabled globally via gitconfig.
+
+### Aliases
+
 | Alias | Command |
 |-------|---------|
 | `co` | `checkout` |
@@ -123,364 +314,36 @@ Git uses `delta` as the pager for beautiful side-by-side diffs with the `forest-
 | `undo` | `reset --soft HEAD^` |
 | `cm` | `commit -m` |
 
-**Shell aliases:**
-| Alias | Command | Description |
-|-------|---------|-------------|
-| `ga` | `git add` | Stage files |
-| `gst` | `git status` | Show status |
-| `gd` | `git diff` | Show diff |
-| `gcm` | `git commit -m` | Commit with message |
-| `gcmd` | `git commit -m "."` | Quick dot commit |
-| `gcl` | `git clone` | Clone repo |
-| `gps` | `git push` | Push |
-| `gpl` | `git pull` | Pull |
-| `guname` | `git config --file ~/.gitconfig.secret user.name` | Get/set git user name |
-| `guemail` | `git config --file ~/.gitconfig.secret user.email` | Get/set git user email |
+### Secrets
 
-**Git functions:**
-| Function | Description |
-|----------|-------------|
-| `gitsetup --name <name> --email <email>` | Configure git user name and email |
-| `gclone <user> <repo>` | Clone from GitHub (`git@github.com:user/repo.git`) |
-| `gra <user> <repo>` | Add GitHub remote origin |
-| `vimconflicts` | Open all git conflict files in nvim |
+Credentials stored in `~/.gitconfig.secret` (included via `[include]`), managed by `dotsecret` command.
 
-### Neovim (Lazy.nvim)
+---
 
-**LSP Support:**
-- C/C++: clangd
-- Python: pylsp + jedi_language_server
-- Lua: lua_ls
-- Auto-install via Mason
+## Cross-Platform Support
 
-**Key Plugins:**
-- `telescope.nvim` - Fuzzy finder
-- `nvim-cmp` - Autocompletion
-- `treesitter` - Syntax highlighting
-- `gitsigns` - Git integration
-- `codeium` - AI completion
+| Feature | Linux | macOS |
+|---------|-------|-------|
+| Package install | apt + cargo + scripts | Homebrew |
+| Xmodmap | Symlinked | Skipped |
+| DNS fix | dnsmasq split DNS | Skipped |
+| locale-gen | Runs | Skipped |
+| Nerd Fonts | Manual install | `brew install font-fira-code-nerd-font` |
+| tmux statusbar | CPU/RAM/GPU | CPU/RAM (no nvidia-smi) |
 
-### AI Tools (full profile)
-- **Claude Code** with oh-my-claudecode + superpowers plugins
-- **OpenAI Codex CLI** for code generation
-- LSP plugins for multiple languages (TypeScript, Python, Go, Rust, C/C++, etc.)
+---
 
-## Secrets Management
+## Quick Reference
 
-Sensitive config files (tokens, credentials) are stored in a separate private repository and automatically fetched during installation.
+Run `dothelp` in your terminal for a categorized reference of all aliases, functions, keybindings, and plugins.
 
 ```bash
-# Fetch secrets (runs automatically during install/update)
-bash src/install-secrets.sh
-
-# Save current secrets to private repo
-bash src/install-secrets.sh --save
+dothelp              # show everything
+dothelp alias        # aliases only
+dothelp func         # functions only
+dothelp key          # keybindings only
+dothelp accel        # GPU commands
+dothelp vim          # neovim keys
+dothelp tmux         # tmux keys
+dothelp plugin       # plugin list
 ```
-
-Secret file mapping is defined in `src/install-secrets.sh` (`SECRET_MAP`). To add a new secret, append an entry in the format `"path_in_repo:destination:permissions"`.
-
-| Secret | Destination | Description |
-|--------|-------------|-------------|
-| `config/glab-cli/config.yml` | `~/.config/glab-cli/config.yml` | GitLab CLI auth token |
-| `git/gitconfig.secret` | `~/.gitconfig.secret` | Git user name/email |
-
-**Setup**: Create a private repo (e.g., `dotfiles-secret`) and set `DOTFILES_SECRETS_REPO` env var if using a non-default URL.
-
-## Utility Functions
-
-### DNS Optimization (Docker)
-
-Docker containers often have slow DNS resolution. This is automatically fixed during installation, but you can also run it manually:
-
-```bash
-fix-dns          # Diagnose and fix DNS latency
-fix-dns --check  # Diagnose only (no changes)
-fix-dns --force  # Fix without confirmation
-```
-
-### Oh-My-ClaudeCode Management
-
-```bash
-omc update       # Update OMC (CLAUDE.md, plugin, HUD)
-claude           # Launch Claude Code
-```
-
-### Accelerator Device Selection
-
-Set visible devices for hardware accelerators. Selected devices are displayed in the shell prompt.
-
-| Command | Environment Variable | Prompt Display |
-|---------|---------------------|----------------|
-| `ug <ids>` / `usegpu` | `CUDA_VISIBLE_DEVICES` | `cuda:0,1` |
-| `uh <ids>` / `usehpu` | `HABANA_VISIBLE_DEVICES` | `habana:0` |
-| `um <ids>` / `usemaccel` | `MACCEL_VISIBLE_DEVICES` | `maccel:0,1` |
-
-```bash
-ug 0,1    # Use NVIDIA GPU 0 and 1
-uh 0      # Use Intel Gaudi HPU 0
-um 0      # Use Mobilint NPU 0
-ug        # Clear selection (use all)
-```
-
-### Hardware Monitoring
-
-Real-time monitoring aliases for accelerators. NPU usage is also displayed in tmux statusbar when `npustat` is available.
-
-| Alias | Command | Description |
-|-------|---------|-------------|
-| `gpu` | `watch gpustat --color` | NVIDIA GPU monitoring |
-| `gpusmi` | `watch nvidia-smi` | nvidia-smi output |
-| `npu` | `watch npustat --color` | Mobilint NPU monitoring |
-| `hpusmi` | `watch hl-smi` | Intel Gaudi HPU monitoring |
-
-**Note:** `npustat` is a custom tool (similar to gpustat) installed from `~/.dotfiles/npustat`.
-
-### Python Environment
-
-Set PYTHONPATH easily. The path is displayed in the shell prompt when set.
-
-| Command | Environment Variable | Prompt Display |
-|---------|---------------------|----------------|
-| `up <path>` | `PYTHONPATH` | `pypath:~/project` |
-
-```bash
-up .          # Set PYTHONPATH to current directory
-up /path/to   # Set PYTHONPATH to specified path
-up            # Clear PYTHONPATH
-```
-
-### Quick Reference
-
-View dotfiles commands, aliases, keybindings, and plugins at a glance.
-
-```bash
-dothelp            # Show all categories
-dothelp alias      # Aliases only
-dothelp func       # Functions only
-dothelp key        # All keybindings
-dothelp vim        # Neovim keys only
-dothelp tmux       # Tmux keys only
-dothelp accel      # Accelerator commands
-dothelp plugin     # Installed plugins
-```
-
-### Jupyter & Process Listing
-
-| Alias | Description |
-|-------|-------------|
-| `jn` | `jupyter notebook` |
-| `jna` | `jupyter notebook --ip 0.0.0.0` |
-| `jl` | `jupyter lab` |
-| `jla` | `jupyter lab --ip 0.0.0.0 --allow-root` |
-| `jnlist` | List running Jupyter notebooks |
-| `tblist` | List running TensorBoard processes |
-| `pylist` | List running Python processes |
-
-### CUDA / CMake
-
-| Alias | Description |
-|-------|-------------|
-| `cudav` | Show CUDA version (`nvcc --version`) |
-| `cudnnv` | Show cuDNN version |
-| `cmo` / `cmakeauto` | CMake preset for Mobilint Aries2 |
-| `cmo_r` / `cmakeauto_r` | CMake preset for Mobilint Regulus |
-
-### Other Functions
-
-| Function | Description |
-|----------|-------------|
-| `pyclean` | Remove Python cache files |
-| `howmany <dir> "*.ext"` | Count files matching pattern |
-| `fuzzyvim` | Open file with fzf + vim |
-| `buo <files>` | Backup files before overwriting |
-| `colorprint <file>` / `cpr` | Display file with ANSI color rendering |
-| `myrsync <port> <args>` | rsync with custom SSH port |
-
-## Key Bindings
-
-### Leader Keys
-- **Leader**: `,` (comma)
-- **Local Leader**: `.` (period)
-
-### Essential
-| Key | Action |
-|-----|--------|
-| `,R` | Reload config |
-| `,s` | Save file |
-| `@` | Clear search highlight |
-| `<C-p>` | Find files |
-| `<C-o>` | Live grep |
-| `<F8>` | Toggle paste mode |
-| `<F9>` | Toggle line numbers |
-
-### Navigation
-| Key | Action |
-|-----|--------|
-| `[b` / `]b` | Previous/Next buffer |
-| `,g` | Go back (after goto-definition) |
-| `<C-h/j/k/l>` | Navigate splits (vim-tmux) |
-
-### Editing
-| Key | Action |
-|-----|--------|
-| `y` / `yy` | Yank to system clipboard |
-| `,b` | Insert ipdb breakpoint above |
-| `,v` | Insert ipdb breakpoint below |
-| `<` / `>` (visual) | Indent and keep selection |
-
-### Tmux (prefix: Ctrl-A)
-| Key | Action |
-|-----|--------|
-| `v` | Vertical split (side by side) |
-| `s` | Horizontal split (top/bottom) |
-| `hjkl` | Navigate panes |
-| `c` | New window |
-| `0-9` | Select window by number |
-| `q` | Display pane numbers |
-| `r` | Reload config |
-| `e` | Toggle sync mode (all panes) |
-| `>/<` | Resize pane width |
-| `+/-` | Resize pane height |
-| `Esc/Enter` | Enter copy mode |
-
-## Customization
-
-### Adding New Zsh Modules
-Create files in `zsh/zsh.d/` with numeric prefix:
-- `10-19`: Functions
-- `20-29`: Aliases
-- `30-39`: Git
-
-## Update (Without Rebuilding Docker)
-
-Update dotfiles when remote repository changes, without rebuilding Docker image.
-
-### Quick Commands
-
-| Command | Description |
-|---------|-------------|
-| `dotup` | Fast update (git pull + relink + secrets + plugins) |
-| `dotup-full` | Full update (includes system packages) |
-| `dotsecret` | Save secrets to private repo |
-| `dotup --versions` | Show current version configuration |
-| `dotcd` | Navigate to dotfiles directory |
-| `omc update` | Update Oh-My-ClaudeCode components |
-
-### What Each Command Does
-
-```bash
-dotup              # Daily use - quick sync
-├── git pull
-├── Relink symlinks (zshrc, gitconfig, nvim, tmux...)
-├── Fetch secrets from private repo
-├── Detect version config changes → warn if --packages needed
-├── Sync Neovim plugins (Lazy)
-├── Update Tmux plugins (TPM)
-└── Update Zplug plugins
-
-dotup-full         # When packages changed
-├── (all above)
-└── Reinstall system packages with version management
-```
-
-### Usage Examples
-
-```bash
-# Regular update
-dotup
-
-# Full update including system packages
-dotup-full              # alias for update.sh --full
-dotup --packages        # equivalent
-
-# Check versions before updating
-dotup --versions
-
-# Override specific version
-VERSION_NEOVIM=v0.9.5 dotup-full
-
-# Apply changes to current shell
-source ~/.zshrc  # or: exec zsh
-```
-
-## Version Management
-
-Package versions are managed per-environment to ensure compatibility.
-
-### How It Works
-
-```
-config/versions.sh           # Default versions
-         ↓
-config/versions.d/ubuntu-22.04.sh   # OS-specific override
-         ↓
-config/versions.d/local.sh   # Machine-specific (gitignored)
-         ↓
-Environment variable         # Highest priority
-```
-
-### Managed Packages
-
-| Category | Packages | Install Method |
-|----------|----------|----------------|
-| Core | Neovim, Lua, Luarocks, Node.js | Built from source / NodeSource |
-| Rust/Cargo | tree-sitter-cli, git-delta, eza, du-dust, ast-grep | `cargo install` |
-| Python (uv) | pynvim, gpustat, npustat, pre-commit, black, isort, jedi_language_server, python-lsp-server | `uv tool install` |
-| Scripts | zoxide, shfmt, bun, uv | Installer scripts |
-| Image | kitty, magick (luarocks) | Custom installers |
-| WakeMeOps | glab | APT repo (WakeMeOps) |
-| Mobilint | mobilint-cli, mobilint-qb-runtime | APT repo / uv |
-
-**Note:** apt packages use Ubuntu defaults (tested for that release). Rust is installed via `rustup` if not present.
-
-### Adding New Environment
-
-```bash
-# Create override for new Ubuntu version
-cat > config/versions.d/ubuntu-26.04.sh << 'EOF'
-#!/bin/bash
-export VERSION_NEOVIM="v0.12.0"
-EOF
-```
-
-### Local Overrides
-
-```bash
-# Machine-specific settings (not tracked by git)
-cat > config/versions.d/local.sh << 'EOF'
-#!/bin/bash
-export VERSION_NEOVIM="v0.9.5"  # Use older version on this machine
-EOF
-```
-
-## Troubleshooting
-
-### Common Issues
-
-- **Claude Code slow in Docker**: DNS resolution delay. Run `fix-dns` or check manually:
-  ```bash
-  # Diagnose
-  curl -w "DNS: %{time_namelookup}s\n" -o /dev/null -s https://api.anthropic.com
-
-  # Fix (if DNS > 1s)
-  fix-dns --force
-  ```
-
-- **Special characters missing**: Install Nerd Font (D2Coding Mono Hack)
-
-- **LSP not working**: Restart Neovim for Mason to install servers
-
-- **Codeium permission error**:
-  ```bash
-  chown -R $(whoami):$(whoami) ~/.cache/nvim/codeium
-  chmod -R 755 ~/.cache/nvim/codeium
-  ```
-
-### Cleanup
-```bash
-bash src/cleanse.sh  # Remove all dotfiles symlinks
-```
-
-## License
-
-MIT
