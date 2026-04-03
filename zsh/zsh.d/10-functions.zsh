@@ -315,18 +315,22 @@ function split8() {
         echo "Not in a tmux session."
         return 1
     fi
-    tmux split-window -h
-    tmux select-pane -L
-    tmux split-window -v
-    tmux split-window -v
+    # Split into left and right
+    tmux split-window -h -p 50
+    # Left column: split into 4
     tmux select-pane -t 1
-    tmux split-window -v
-    tmux select-pane -R
-    tmux split-window -v
-    tmux split-window -v
+    tmux split-window -v -p 75
+    tmux select-pane -t 1
+    tmux split-window -v -p 50
+    tmux select-pane -t 3
+    tmux split-window -v -p 50
+    # Right column: split into 4
     tmux select-pane -t 5
-    tmux split-window -v
-    tmux select-layout tiled
+    tmux split-window -v -p 75
+    tmux select-pane -t 5
+    tmux split-window -v -p 50
+    tmux select-pane -t 7
+    tmux split-window -v -p 50
     tmux select-pane -t 1
 }
 
