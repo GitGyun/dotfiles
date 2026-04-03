@@ -43,6 +43,7 @@ SECRET_MAP=(
     "config/huggingface/token:${HOME}/.cache/huggingface/token:600"
     "config/wandb/settings:${HOME}/.config/wandb/settings:600"
     "config/netrc:${HOME}/.netrc:600"
+    "config/codeium/config.json:${HOME}/.cache/nvim/codeium/config.json:600"
 )
 
 #==================================================#
