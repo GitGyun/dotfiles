@@ -41,18 +41,16 @@ install_minimal() {
     mkdir -p "$HOME/.config"
     ln -sfn "$DOT_DIR/nvim" "$HOME/.config/nvim"
 
-    # jupyter
-    mkdir -p "$HOME/.jupyter"
-    ln -sf "$DOT_DIR/config/jupyter_lab_config.py" "$HOME/.jupyter/jupyter_lab_config.py"
-
     # shell and git
     ln -sf "$DOT_DIR/zsh/zsh.d" "$HOME/.zsh.d"
     ln -sf "$DOT_DIR/git/gitconfig" "$HOME/.gitconfig"
     ln -sf "$DOT_DIR/zsh/zshrc" "$HOME/.zshrc"
+    ln -sf "$DOT_DIR/zshenv" "$HOME/.zshenv"
+    mkdir -p "$HOME/.config"
+    ln -sf "$DOT_DIR/config/starship.toml" "$HOME/.config/starship.toml"
     mkdir -p "$HOME/.ssh"
-    ln -sf "$DOT_DIR/ssh/config" "$HOME/.ssh/config"
 
-    # secrets (glab config, gitconfig.secret, etc.)
+    # secrets (glab config, gitconfig.secret, ssh config, etc.)
     bash "$DOT_DIR/src/install-secrets.sh" || true
 
     echo

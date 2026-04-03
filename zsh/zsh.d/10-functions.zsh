@@ -287,6 +287,27 @@ function usegpu() {
 }
 alias ug='usegpu'
 
+# auto-assign GPU based on tmux pane index (pane1→GPU0, pane2→GPU1, ...)
+# usage: autoug        (assign 1 GPU per pane)
+#        autoug 2      (assign 2 GPUs per pane: pane1→0,1  pane2→2,3  ...)
+function autoug(){
+    if [ -z "$TMUX" ]; then
+        echo "Not in a tmux session."
+        return 1
+    fi
+    local gpus_per_pane=${1:-1}
+    local pane_idx=$(tmux display-message -p -t "${TMUX_PANE}" '#{pane_index}')
+    local start=$(( (pane_idx - 1) * gpus_per_pane ))
+    local end=$(( start + gpus_per_pane - 1 ))
+    if [ "$gpus_per_pane" -eq 1 ]; then
+        export CUDA_VISIBLE_DEVICES=$start
+    else
+        export CUDA_VISIBLE_DEVICES=$(seq -s, $start $end)
+    fi
+    export G=$CUDA_VISIBLE_DEVICES
+    echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES (pane $pane_idx)"
+}
+
 # HPU device selection (Intel Gaudi / Habana)
 # Usage: uh [device_ids]
 #   uh 0      - Use HPU 0 only
@@ -363,6 +384,7 @@ function dothelp() {
     # Accelerator & Environment
     if [[ "$show_all" == true || "$1" == "accel" || "$1" == "env" ]]; then
         _header "Accelerator & Environment"
+        _cmd "autoug [n]" "Auto GPU per tmux pane (n=GPUs/pane)"
         _cmd "ug <ids>" "Set CUDA_VISIBLE_DEVICES (prompt: cuda:X)"
         _cmd "uh <ids>" "Set HABANA_VISIBLE_DEVICES (prompt: habana:X)"
         _cmd "um <ids>" "Set MACCEL_VISIBLE_DEVICES (prompt: maccel:X)"
@@ -442,17 +464,23 @@ function dothelp() {
         _cmd "barbar" "Buffer tabs"
         _cmd "mason" "LSP auto-installer"
 
-        _header "Zsh Plugins (zplug)"
+        _header "Zsh Plugins (zinit)"
         _cmd "alias-tips" "Shows alias hints"
+        _cmd "fzf-tab" "Fuzzy tab completion"
         _cmd "syntax-hl" "Command highlighting"
         _cmd "autosugg" "Fish-like suggestions"
         _cmd "fzf + fd" "Fuzzy file finding"
         _cmd "zoxide" "Smart cd (z command)"
+        _cmd "atuin" "Smart shell history (Ctrl+R)"
+        _cmd "starship" "Cross-shell prompt"
 
         _header "Tmux Plugins (TPM)"
         _cmd "resurrect" "Session save/restore"
         _cmd "continuum" "Auto save sessions"
         _cmd "extrakto" "Text extraction (prefix+tab)"
+        _cmd "thumbs" "Screen text quick copy (prefix+F)"
+        _cmd "fzf" "Tmux resource explorer (prefix+C-f)"
+        _cmd "sessionx" "Session manager (prefix+o)"
     fi
 
     # Footer

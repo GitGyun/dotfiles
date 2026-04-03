@@ -632,6 +632,8 @@ main() {
     install_by_script "shfmt" "https://webi.sh/shfmt" \
         '[[ -f ~/.config/envman/PATH.env ]] && source ~/.config/envman/PATH.env'
     install_by_script "zoxide" "https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh"
+    install_by_script "starship" "https://starship.rs/install.sh" "" "sh -s -- -y"
+    install_by_script "atuin" "https://setup.atuin.sh" "" "bash"
     install_by_script "bun" "https://bun.sh/install"
 
     log_section "Neovim"
@@ -681,7 +683,35 @@ main() {
     print_summary
 }
 
+main_macos() {
+    if ! command -v brew &>/dev/null; then
+        log_error "homebrew" "not found"
+        echo "Install Homebrew first: https://brew.sh"
+        return 1
+    fi
+
+    log_section "Homebrew Packages"
+    local brew_packages=(zsh neovim tmux fzf fd ripgrep eza bat zoxide starship atuin git-delta duf jq gh)
+    for pkg in "${brew_packages[@]}"; do
+        if brew list "$pkg" &>/dev/null; then
+            log_skip "$pkg"
+        else
+            log_install "$pkg" "brew"
+            if brew install "$pkg" >/dev/null 2>&1; then
+                log_success "$pkg" "brew"
+            else
+                log_error "$pkg" "brew"
+            fi
+        fi
+    done
+
+    print_summary
+}
+
 # Only run main when executed directly (not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
+    case "$(uname -s)" in
+        Darwin) main_macos "$@" ;;
+        *)      main "$@" ;;
+    esac
 fi

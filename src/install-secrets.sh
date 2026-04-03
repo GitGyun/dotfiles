@@ -12,7 +12,7 @@ set -uo pipefail
 #   https://git.mobilint.com/projects/new
 #==================================================#
 
-SECRETS_REPO="${DOTFILES_SECRETS_REPO:-git@github.com:SeongwoongCho/dotfiles-secret.git}"
+SECRETS_REPO="${DOTFILES_SECRETS_REPO:-git@github.com:GitGyun/dotfiles-secret.git}"
 SECRETS_DIR="${HOME}/dotfiles-secret"
 
 #==================================================#
@@ -38,6 +38,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 SECRET_MAP=(
     "config/glab-cli/config.yml:${HOME}/.config/glab-cli/config.yml:600"
     "git/gitconfig.secret:${HOME}/.gitconfig.secret:600"
+    "ssh/config:${HOME}/.ssh/config:600"
 )
 
 #==================================================#

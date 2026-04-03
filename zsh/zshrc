@@ -49,7 +49,7 @@ export LS_COLORS="$(<$MYDOTFILES/assets/LS_COLORS)"
 
 # OH-MY-ZSH
 # themes: https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="mrtazz_custom"   # set zsh theme
+ZSH_THEME=""  # disabled, using starship instead
 DISABLE_AUTO_UPDATE="true"  # no automatically update oh-my-zsh
 DISABLE_COMPFIX="true"      # skip compaudit checks (faster startup)
 HIST_STAMPS="mm/dd/yyyy"    # history with date stamps
@@ -80,6 +80,7 @@ source "${ZINIT_HOME}/zinit.zsh"
 
 # Synchronous (lightweight)
 zinit light djui/alias-tips
+zinit light Aloxaf/fzf-tab
 
 # Turbo mode: deferred async loading (non-blocking)
 zinit ice wait lucid atload"_zsh_autosuggest_start"
@@ -132,6 +133,25 @@ if [[ -o INTERACTIVE ]]; then
     eval "$(zoxide init zsh)"
 fi
 
+# Atuin (smart shell history)
+if [[ -f "$HOME/.atuin/bin/env" ]]; then
+    source "$HOME/.atuin/bin/env"
+fi
+if command -v atuin &> /dev/null; then
+    eval "$(atuin init zsh --disable-up-arrow)"
+fi
+
+# Starship prompt
+export STARSHIP_CONFIG="$MYDOTFILES/config/starship.toml"
+if command -v starship &> /dev/null; then
+    eval "$(starship init zsh)"
+fi
+
+# Conda env preservation (prevent reset to base on re-source)
+if [[ -n "$CONDA_DEFAULT_ENV" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
+    _CONDA_PREV_ENV="$CONDA_DEFAULT_ENV"
+fi
+
 # Generated for envman. Do not edit.
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
@@ -176,3 +196,11 @@ if [[ -z "$ZSHRC_AUTORELOAD_INITIALIZED" ]]; then
     autoload -Uz add-zsh-hook
     add-zsh-hook precmd _zshrc_auto_reload
 fi
+
+# Restore conda env after re-source (must be at end of file)
+if [[ -n "$_CONDA_PREV_ENV" ]] && command -v conda &> /dev/null; then
+    conda activate "$_CONDA_PREV_ENV" 2>/dev/null
+    unset _CONDA_PREV_ENV
+fi
+
+TZ='Asia/Seoul'; export TZ

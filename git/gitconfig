@@ -17,8 +17,11 @@
     showUntrackedFiles = all
 
 [user]
-	name = seongwoong
-	email = seongwoong@mobilint.com
+	name = GitGyun
+	email = kdgyun425@gmail.com
+
+[init]
+	defaultBranch = main
 
 [credential]
 	helper = store

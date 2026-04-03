@@ -1,0 +1,52 @@
+# Starship prompt configuration
+# https://starship.rs/config/
+
+add_newline = true
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
+
+[username]
+show_always = true
+style_user = "bold green"
+format = "[$user]($style) "
+
+[directory]
+style = "bold #5fd7ff"
+truncation_length = 5
+truncate_to_repo = false
+
+[git_branch]
+style = "bold red"
+
+[git_status]
+disabled = true
+
+[conda]
+format = "[$symbol$environment]($style) "
+style = "bold yellow"
+
+[python]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[package]
+disabled = true
+
+[env_var.CUDA_VISIBLE_DEVICES]
+variable = "CUDA_VISIBLE_DEVICES"
+format = "[| cuda:$env_value](bold #af87ff) "
+
+[env_var.G]
+disabled = true
+
+[hostname]
+ssh_only = true
+style = "bold dimmed white"
+
+[cmd_duration]
+min_time = 5000
+format = "took [$duration](bold yellow) "
