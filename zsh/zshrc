@@ -172,8 +172,8 @@ if [[ -z "$ZSHRC_AUTORELOAD_INITIALIZED" ]]; then
         local mtime
         local files=(
             ~/.zshrc
-            $MYDOTFILES/assets/*.zsh-theme
-            ~/.zsh.d/*.zsh
+            $MYDOTFILES/assets/*.zsh-theme(N)
+            ~/.zsh.d/*.zsh(N)
         )
         for f in $files; do
             [[ -f "$f" ]] || continue
