@@ -71,18 +71,17 @@ main() {
 
   # [window] number (#I), window flag (#F), window name (#W, max 20 chars)
   tmux setw -g window-status-format "\
-#[fg=#0087af,bg=#1c1c1c] #{?#{m:*M*,#F},#[fg=#121212]#[bg=#5faf5f],}#I#F\
-#[fg=#bcbcbc,bg=#1c1c1c] #{=20:window_name}\
-#[bg=#1c1c1c] \
+#[fg=colour239,bg=colour234] #{?#{m:*M*,#F},#[fg=#121212]#[bg=#5faf5f],}#I#F\
+#[fg=colour250,bg=colour234] #{=20:window_name} \
 "
 
   # [active window] (window name max 25 chars)
   tmux setw -g window-status-current-format "\
-#[fg=#1c1c1c,bg=#0087af,nobold,nounderscore,noitalics]\
-#[fg=#5fffff,bg=#0087af] #{?#{m:*M*,#F},#[fg=#121212]#[bg=#5faf5f],}#I#F\
-#[fg=#ffffff,bg=#0087af,bold] #{=25:window_name}\
-#{?pane_synchronized,#[fg=#d7ff00] (SYNC),} \
-#[fg=#0087af,bg=#1c1c1c,nobold,nounderscore,noitalics]\
+#[fg=colour234,bg=#5f3f6f,nobold,nounderscore,noitalics]\
+#[fg=#d7afff,bg=#5f3f6f] #{?#{m:*M*,#F},#[fg=#121212]#[bg=#5faf5f],}#I#F\
+#[fg=#ffffff,bg=#5f3f6f,bold] #{=25:window_name}\
+#{?pane_synchronized,#[fg=#d7afff] (SYNC),} \
+#[fg=#5f3f6f,bg=colour234,nobold,nounderscore,noitalics]\
 "
 }
 
