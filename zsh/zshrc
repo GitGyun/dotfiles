@@ -45,7 +45,7 @@ export COLORTERM='truecolor'
 
 #==================================================#
 ### zsh settings
-export LS_COLORS="$(<$MYDOTFILES/assets/LS_COLORS)"
+[[ -f "$MYDOTFILES/assets/LS_COLORS" ]] && export LS_COLORS="$(<$MYDOTFILES/assets/LS_COLORS)"
 
 # OH-MY-ZSH
 # themes: https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
