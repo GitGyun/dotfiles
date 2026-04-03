@@ -146,7 +146,22 @@ autoug 2            # pane1->0,1  pane2->2,3  (2 GPUs per pane)
 python main.py --shard_id $G
 ```
 
-Works with `prefix + e` (synchronize-panes) -- each pane gets its own GPU.
+Works with `prefix + y` (synchronize-panes) -- each pane gets its own GPU.
+
+### Tmux Pane Splitting
+
+| Command | Description |
+|---------|-------------|
+| `split4` | Split into 4 panes (2x2 grid, equal size) |
+| `split8` | Split into 8 panes (2x4 grid, equal size) |
+
+```bash
+# 8 GPU workflow: split + auto-assign
+split8
+# prefix + y (sync on)
+autoug
+# prefix + y (sync off)
+```
 
 ### Monitoring
 

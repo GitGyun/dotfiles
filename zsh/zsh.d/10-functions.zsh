@@ -308,30 +308,40 @@ function autoug(){
 }
 
 
-# Split tmux into 8 panes (2 columns x 4 rows)
+# Split tmux into 4 panes (2 columns x 2 rows, equal size)
+# Usage: split4
+function split4() {
+    if [ -z "$TMUX" ]; then
+        echo "Not in a tmux session."
+        return 1
+    fi
+    tmux split-window -h    # left | right*
+    tmux split-window -v    # right top | right bottom*
+    tmux select-pane -L     # left*
+    tmux split-window -v    # left top | left bottom*
+    tmux select-pane -t 1   # back to first pane
+}
+
+# Split tmux into 8 panes (2 columns x 4 rows, equal size)
 # Usage: split8
 function split8() {
     if [ -z "$TMUX" ]; then
         echo "Not in a tmux session."
         return 1
     fi
-    # Split into left and right
-    tmux split-window -h -p 50
-    # Left column: split into 4
-    tmux select-pane -t 1
-    tmux split-window -v -p 75
-    tmux select-pane -t 1
-    tmux split-window -v -p 50
-    tmux select-pane -t 3
-    tmux split-window -v -p 50
-    # Right column: split into 4
-    tmux select-pane -t 5
-    tmux split-window -v -p 75
-    tmux select-pane -t 5
-    tmux split-window -v -p 50
-    tmux select-pane -t 7
-    tmux split-window -v -p 50
-    tmux select-pane -t 1
+    tmux split-window -h    # v: left | right*
+    tmux split-window -v    # s: right top | right bottom*
+    tmux split-window -v    # s: right top | right mid | right bottom*
+    tmux select-pane -U     # k
+    tmux select-pane -U     # k -> right top*
+    tmux split-window -v    # s: 4 right panes
+    tmux select-pane -L     # h -> left*
+    tmux split-window -v    # s: left top | left bottom*
+    tmux split-window -v    # s: left top | left mid | left bottom*
+    tmux select-pane -U     # k
+    tmux select-pane -U     # k -> left top*
+    tmux split-window -v    # s: 4 left panes
+    tmux select-pane -t 1   # back to first pane
 }
 
 # PYTHONPATH setting
