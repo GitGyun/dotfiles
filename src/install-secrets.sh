@@ -36,9 +36,14 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # Add new secrets here:
 #==================================================#
 SECRET_MAP=(
-    "config/glab-cli/config.yml:${HOME}/.config/glab-cli/config.yml:600"
     "git/gitconfig.secret:${HOME}/.gitconfig.secret:600"
     "ssh/config:${HOME}/.ssh/config:600"
+    "config/glab-cli/config.yml:${HOME}/.config/glab-cli/config.yml:600"
+    "config/gh/hosts.yml:${HOME}/.config/gh/hosts.yml:600"
+    "config/atuin/key:${HOME}/.local/share/atuin/key:600"
+    "config/huggingface/token:${HOME}/.cache/huggingface/token:600"
+    "config/wandb/settings:${HOME}/.config/wandb/settings:600"
+    "config/netrc:${HOME}/.netrc:600"
 )
 
 #==================================================#
