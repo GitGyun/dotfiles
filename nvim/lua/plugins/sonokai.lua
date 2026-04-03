@@ -7,9 +7,8 @@ return {
 		vim.g.sonokai_enable_italic = 1
 		vim.g.sonokai_disable_italic_comment = 1
 	end,
-	-- To use sonokai instead of OceanicNext, uncomment below and
-	-- comment out the colorscheme line in oceanic-next.lua:
-	-- init = function()
-	-- 	vim.cmd.colorscheme("sonokai")
-	-- end,
+	init = function()
+		vim.cmd.colorscheme("sonokai")
+		vim.api.nvim_set_hl(0, "CursorLine", { bg = "#2a2a2a" })
+	end,
 }

@@ -625,15 +625,15 @@ main() {
         log_skip "starship"
     fi
     # atuin (shell history)
-    if ! command -v atuin >/dev/null 2>&1; then
+    if command -v atuin >/dev/null 2>&1 || [[ -x "$HOME/.atuin/bin/atuin" ]]; then
+        log_skip "atuin"
+    else
         log_install "atuin" "script"
-        if curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh 2>/dev/null | bash >/dev/null 2>&1; then
+        if timeout 60 bash -c 'curl --proto "=https" --tlsv1.2 -LsSf https://setup.atuin.sh 2>/dev/null | ATUIN_NO_MODIFY_PATH=1 bash' >/dev/null 2>&1; then
             log_success "atuin" "script"
         else
             log_error "atuin" "script"
         fi
-    else
-        log_skip "atuin"
     fi
     install_by_script "bun" "https://bun.sh/install"
 

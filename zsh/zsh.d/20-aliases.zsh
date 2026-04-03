@@ -3,6 +3,7 @@
 
 # Editor
 alias vim='nvim'
+alias vi='nvim'
 alias vimconflicts='vim $(git diff --name-only --diff-filter=U)'
 
 # Terminal multiplexer
