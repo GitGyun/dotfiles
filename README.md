@@ -125,13 +125,6 @@ Cross-shell prompt configured in `config/starship.toml`:
 | `vim` | `nvim` |
 | `tmux` | `tmux -u` (UTF-8 mode) |
 
-### Jupyter
-
-| Alias | Command |
-|-------|---------|
-| `jl` / `jla` | `jupyter lab` / `jupyter lab --ip 0.0.0.0` |
-| `jn` / `jna` | `jupyter notebook` / `jupyter notebook --ip 0.0.0.0` |
-
 ### GPU Management
 
 | Alias | Description |
@@ -155,21 +148,11 @@ python main.py --shard_id $G
 
 Works with `prefix + e` (synchronize-panes) -- each pane gets its own GPU.
 
-### Tensorboard & Visdom
-
-| Alias | Usage |
-|-------|-------|
-| `tsb <port> <logdir>` | Start tensorboard |
-| `tsbs <port> <logdir>` | Start tensorboard (no image/scalar sampling) |
-| `vis` | Start visdom server |
-
 ### Monitoring
 
 | Alias | Description |
 |-------|-------------|
-| `tblist` | List tensorboard processes |
 | `pylist` | List python processes |
-| `jnlist` | List jupyter notebooks |
 
 ### Git
 

@@ -8,12 +8,6 @@ alias vimconflicts='vim $(git diff --name-only --diff-filter=U)'
 # Terminal multiplexer
 alias tmux='tmux -u'
 
-# Jupyter
-alias jn='jupyter notebook'
-alias jna='jupyter notebook --ip 0.0.0.0'
-alias jl='jupyter lab'
-alias jla='jupyter lab --ip 0.0.0.0 --allow-root'
-
 # Modern CLI replacements
 alias ls='eza'
 alias df='duf'
@@ -26,22 +20,7 @@ fi
 alias du='du -hd 1'
 alias cpr='colorprint'
 
-# Tensorboard
-function tsbwrapper(){
-    tensorboard --bind_all --port $1  --logdir $2
-}
-function tsbswrapper(){
-    tensorboard --bind_all --port $1  --logdir $2 --samples_per_plugin images=0,scalars=0
-}
-alias tsb='tsbwrapper'
-alias tsbs='tsbswrapper'
-
-# Visdom
-alias vis='python -m visdom.server'
-
 # Process listing
-alias jnlist='jupyter notebook list'
-alias tblist='ps -ef | grep "tensorboard"'
 alias pylist='ps -ef | grep "python"'
 
 # Claude Code (auto-update OMC before launch)
