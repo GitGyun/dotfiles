@@ -286,6 +286,20 @@ function usegpu() {
 }
 alias ug='usegpu'
 
+# Assign all available GPUs
+# Usage: uga
+function usegpuall() {
+    local n=$(nvidia-smi -L 2>/dev/null | wc -l)
+    if [[ $n -eq 0 ]]; then
+        echo "No GPUs found."
+        return 1
+    fi
+    export CUDA_VISIBLE_DEVICES=$(seq -s, 0 $((n-1)))
+    export G=$CUDA_VISIBLE_DEVICES
+    echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES ($n GPUs)"
+}
+alias uga='usegpuall'
+
 # auto-assign GPU based on tmux pane index (pane1→GPU0, pane2→GPU1, ...)
 # usage: autoug        (assign 1 GPU per pane)
 #        autoug 2      (assign 2 GPUs per pane: pane1→0,1  pane2→2,3  ...)

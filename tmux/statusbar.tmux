@@ -19,10 +19,10 @@ main() {
       TMUX_STATUS_BG="colour$PROMPT_HOST_COLOR"
   fi
 
-  # [left status] session name (#S) - dark gray to distinguish from active tab
+  # [left status] session name (#S) - purple to match active window
   tmux set -g status-left "\
-#[fg=#ffffff,bg=#444444,bold] #S \
-#[fg=#444444,bg=#1c1c1c]\
+#[fg=#ffffff,bg=#5f3f6f,bold] #S \
+#[fg=#5f3f6f,bg=colour234]\
 "
 
   # [right status]
@@ -36,7 +36,7 @@ main() {
 
   # [right status] prefix indicator + datetime
   tmux set -g status-right "\
-#[fg=#ffffff,bg=#005fd7]#{s/^(.+)$/ \\1 :#{s/root//:client_key_table}}\
+#[fg=#ffffff,bg=#5f3f6f]#{s/^(.+)$/ \\1 :#{s/root//:client_key_table}}\
 #[default]\
 "
 

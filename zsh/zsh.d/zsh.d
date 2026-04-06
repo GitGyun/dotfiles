@@ -1,0 +1,1 @@
+/home/kdgyun425/.dotfiles/zsh/zsh.d
