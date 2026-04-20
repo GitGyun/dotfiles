@@ -199,7 +199,7 @@ fi
 
 # Auto-initialize conda if available
 if [[ -z "$CONDA_SHLVL" ]]; then
-    for _conda_prefix in /opt/conda "$HOME/miniconda3" "$HOME/anaconda3" "$HOME/conda"; do
+    for _conda_prefix in /opt/miniconda3 /opt/conda "$HOME/miniconda3" "$HOME/anaconda3" "$HOME/conda"; do
         if [[ -f "$_conda_prefix/etc/profile.d/conda.sh" ]]; then
             source "$_conda_prefix/etc/profile.d/conda.sh"
             break
