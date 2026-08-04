@@ -584,6 +584,14 @@ main() {
         install_by_apt "$pkg"
     done
 
+    # Debian/Ubuntu name the fd binary `fdfind`, but zshrc's FZF_DEFAULT_COMMAND
+    # calls `fd` directly (not through an alias).
+    if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+        mkdir -p "$HOME/.local/bin"
+        ln -sfn "$(command -v fdfind)" "$HOME/.local/bin/fd"
+        log_success "fd" "fdfind symlink"
+    fi
+
     log_section "Rust & Cargo"
     install_rust
     export PATH="$HOME/.cargo/bin:$PATH"
@@ -623,17 +631,6 @@ main() {
         fi
     else
         log_skip "starship"
-    fi
-    # atuin (shell history)
-    if command -v atuin >/dev/null 2>&1 || [[ -x "$HOME/.atuin/bin/atuin" ]]; then
-        log_skip "atuin"
-    else
-        log_install "atuin" "script"
-        if timeout 60 bash -c 'curl --proto "=https" --tlsv1.2 -LsSf https://setup.atuin.sh 2>/dev/null | ATUIN_NO_MODIFY_PATH=1 bash' >/dev/null 2>&1; then
-            log_success "atuin" "script"
-        else
-            log_error "atuin" "script"
-        fi
     fi
     install_by_script "bun" "https://bun.sh/install"
 
@@ -683,7 +680,7 @@ main_macos() {
     fi
 
     log_section "Homebrew Packages"
-    local brew_packages=(zsh neovim tmux fzf fd ripgrep eza bat zoxide starship atuin git-delta duf jq gh)
+    local brew_packages=(zsh neovim tmux fzf fd ripgrep eza bat zoxide starship git-delta duf jq gh)
     for pkg in "${brew_packages[@]}"; do
         if brew list "$pkg" &>/dev/null; then
             log_skip "$pkg"

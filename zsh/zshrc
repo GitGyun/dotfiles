@@ -7,7 +7,7 @@ export MYDOTFILES="$HOME/.dotfiles"
 typeset -U PATH  # -U ensures unique entries only
 path=(
     "$HOME/.local/bin"
-    "$HOME/.atuin/bin"
+    "$HOME/.npm-global/bin"  # npm global prefix (omc, codex); the `claude` alias needs omc
     "$HOME/bin"
     "$HOME/.bun/bin"
     "$HOME/.cargo/bin"
@@ -129,16 +129,8 @@ export CC='ccache gcc'
 export CXX='ccache g++'
 
 # Zoxide initialization
-if [[ -o INTERACTIVE ]]; then
+if [[ -o INTERACTIVE ]] && command -v zoxide &> /dev/null; then
     eval "$(zoxide init zsh)"
-fi
-
-# Atuin (smart shell history)
-if [[ -f "$HOME/.atuin/bin/env" ]]; then
-    source "$HOME/.atuin/bin/env"
-fi
-if command -v atuin &> /dev/null; then
-    eval "$(atuin init zsh --disable-up-arrow)"
 fi
 
 # Starship prompt

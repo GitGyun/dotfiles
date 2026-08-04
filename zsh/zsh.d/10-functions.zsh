@@ -473,7 +473,6 @@ function dothelp() {
         _cmd "nvim-cmp" "Autocompletion"
         _cmd "treesitter" "Syntax highlighting"
         _cmd "gitsigns" "Git integration"
-        _cmd "codeium" "AI code completion"
         _cmd "nvim-tree" "File explorer"
         _cmd "barbar" "Buffer tabs"
         _cmd "mason" "LSP auto-installer"
@@ -485,7 +484,6 @@ function dothelp() {
         _cmd "autosugg" "Fish-like suggestions"
         _cmd "fzf + fd" "Fuzzy file finding"
         _cmd "zoxide" "Smart cd (z command)"
-        _cmd "atuin" "Smart shell history (Ctrl+R)"
         _cmd "starship" "Cross-shell prompt"
 
         _header "Tmux Plugins (TPM)"

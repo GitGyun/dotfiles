@@ -25,10 +25,6 @@ return {
 			_G.lsp_capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 			local cmp = require("cmp")
-			local function is_blank_line()
-				local line = vim.api.nvim_get_current_line()
-				return line:match("^%s*$") ~= nil
-			end
 			local luasnip = require("luasnip")
 			cmp.setup({
 				snippet = {
@@ -65,14 +61,12 @@ return {
 							Event = "",
 							Operator = "󰆕",
 							TypeParameter = "",
-							Codeium = "󰚩",
 						},
 						menu = {
 							nvim_lsp = "[LSP]",
 							buffer = "[Buffer]",
 							latex_symbols = "[Latex]",
 							luasnip = "[LuaSnip]",
-							Codeium = "[AI]",
 						},
 					}),
 				},
@@ -87,22 +81,7 @@ return {
 					},
 				},
 				mapping = cmp.mapping.preset.insert({
-					["<C-Space>"] = cmp.mapping(function()
-						if is_blank_line() then
-							-- 빈 줄: codeium 소스만 강제로 호출
-							require("cmp").complete({
-								config = {
-									sources = {
-										{ name = "codeium" },
-									},
-								},
-							})
-						else
-							-- 그 외: 기존 기본 소스로 동작
-							require("cmp").complete()
-						end
-					end, { "i", "c" }),
-					-- ['<C-Space>'] = cmp.mapping.complete(),
+					["<C-Space>"] = cmp.mapping.complete(),
 					["<CR>"] = cmp.mapping.confirm({
 						behavior = cmp.ConfirmBehavior.Replace,
 						select = true,
@@ -127,7 +106,6 @@ return {
 					-- end, { 'i', 's' }),
 				}),
 				sources = cmp.config.sources({
-					{ name = "codeium", priority = 1000 },
 					{ name = "nvim_lsp", priority = 800 },
 					{ name = "luasnip", priority = 750 },
 				}, {
