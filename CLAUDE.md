@@ -35,7 +35,7 @@ shfmt (indent=2, CI mode) and StyLua run on commit. Shell scripts use 2-space in
 
 - **`src/install.sh`** - Main entry point. Profiles are cumulative: `install_minimal` -> `install_standard` -> `install_full`. Creates symlinks from this repo into `$HOME`.
 - **`src/install-prerequisite.sh`** - System package installer with helpers (`install_by_apt`, `install_by_cargo`, `install_by_uv`, `install_by_script`). Detects Linux vs macOS and uses apt/cargo/uv or Homebrew accordingly. Includes DNS optimization with dnsmasq split DNS.
-- **`src/install-secrets.sh`** - Syncs secrets (gitconfig.secret, SSH config, netrc, HuggingFace token, wandb, gh/glab tokens) with a private git repo. Secret mapping defined in `SECRET_MAP` array; repo-side paths mirror the destination structure (`ssh/config`, `config/huggingface/token`, ...). Missing sources are skipped on install and collected by `--save` when present locally.
+- **`src/install-secrets.sh`** - Syncs secrets (gitconfig.secret, SSH config, netrc, HuggingFace token, wandb, rclone config) with a private git repo. Secret mapping defined in `SECRET_MAP` array; repo-side paths mirror the destination structure (`ssh/config`, `config/huggingface/token`, ...). Missing sources are skipped on install and collected by `--save` when present locally.
 - **`src/update.sh`** - Updater: pulls git, relinks symlinks, syncs neovim/tmux/zplug plugins. Stashes local changes before pull.
 - **`config/versions.sh`** - Central version pinning. Loads environment-specific overrides from `config/versions.d/{distro}-{version}.sh`. Local overrides go in `config/versions.d/local.sh` (gitignored).
 
@@ -51,6 +51,8 @@ Config files in this repo are symlinked into `$HOME`:
 ## Shell Config Loading Order
 
 Zsh sources files from `zsh/zsh.d/` in numeric order: `10-functions.zsh` (utility functions), `20-aliases.zsh` (aliases), `30-git.zsh` (git aliases/functions). The zshrc auto-reloads when these files change.
+
+- **`src/setup-rclone-drive.sh`** - One-time setup of the `mydrive` Google Drive remote. Normally unnecessary: `install-secrets.sh` delivers a working `rclone.conf`. Handles both the browser flow and the headless `rclone authorize` handoff, and stores the GCP OAuth client in `~/.config/rclone/gcp-oauth.env`.
 
 ## Adding Secrets
 

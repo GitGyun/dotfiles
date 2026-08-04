@@ -28,8 +28,9 @@ echo '** [CORE] Installing required apt packages...'
 # fd-find/bat: FZF_DEFAULT_COMMAND and the `bat` alias in zsh.d
 # locales: en_US.UTF-8 configured by install.sh
 # dnsmasq: split DNS optimization
+# unzip: rclone is distributed as a zip archive
 apt-get install -y -qq \
-    zsh tmux git curl ca-certificates tar gzip \
+    zsh tmux git curl ca-certificates tar gzip unzip \
     bc procps fzf xclip ripgrep fd-find bat locales dnsmasq
 
 echo '** [CORE] Installing Node.js...'
@@ -58,10 +59,12 @@ case "$(uname -m)" in
     x86_64|amd64)
         nvim_arch="x86_64"
         eza_arch="x86_64"
+        rclone_arch="amd64"
         ;;
     aarch64|arm64)
         nvim_arch="arm64"
         eza_arch="aarch64"
+        rclone_arch="arm64"
         ;;
     *)
         echo "Unsupported architecture: $(uname -m)" >&2
@@ -122,4 +125,26 @@ if command -v starship >/dev/null 2>&1; then
 else
     curl -sSfL https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin" \
         || echo '[WARN] starship installation failed' >&2
+fi
+
+# rclone (Google Drive sync): prebuilt binary, same reasoning as eza above.
+# The Drive remote itself comes from the secrets repo, or from
+# src/setup-rclone-drive.sh on the first machine.
+if command -v rclone >/dev/null 2>&1; then
+    echo '** [CORE] rclone already installed, skipping'
+else
+    rclone_version="${VERSION_RCLONE:-current}"
+    if [[ "$rclone_version" == "current" ]]; then
+        rclone_url="https://downloads.rclone.org/rclone-current-linux-${rclone_arch}.zip"
+    else
+        rclone_url="https://downloads.rclone.org/${rclone_version}/rclone-${rclone_version}-linux-${rclone_arch}.zip"
+    fi
+    # The archive nests the binary under rclone-<version>-linux-<arch>/
+    if curl -fsSL "$rclone_url" -o "$tmp_dir/rclone.zip" \
+        && unzip -q -o "$tmp_dir/rclone.zip" -d "$tmp_dir/rclone"; then
+        install -m 755 "$tmp_dir"/rclone/rclone-*/rclone "$HOME/.local/bin/rclone"
+        echo "** [CORE] rclone installed at $HOME/.local/bin/rclone"
+    else
+        echo "[WARN] Could not download rclone from $rclone_url" >&2
+    fi
 fi

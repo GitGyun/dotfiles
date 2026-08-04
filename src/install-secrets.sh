@@ -36,6 +36,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 #   git/gitconfig.secret
 #   ssh/config
 #   config/{netrc,huggingface/token,wandb/settings}
+#   config/rclone/{rclone.conf,gcp-oauth.env}
 #
 # CLI auth tokens (gh, glab) are deliberately NOT synced: they cannot
 # bootstrap anything (they live inside the repo they grant access to),
@@ -52,6 +53,12 @@ SECRET_MAP=(
     "config/netrc:${HOME}/.netrc:600"
     "config/huggingface/token:${HOME}/.cache/huggingface/token:600"
     "config/wandb/settings:${HOME}/.config/wandb/settings:600"
+    # rclone.conf carries the Drive OAuth token, so a new machine gets a
+    # working `mydrive` remote with no interaction. gcp-oauth.env holds just
+    # the OAuth client id/secret, which survive a revoked token and are all
+    # setup-rclone-drive.sh needs to re-authorize.
+    "config/rclone/rclone.conf:${HOME}/.config/rclone/rclone.conf:600"
+    "config/rclone/gcp-oauth.env:${HOME}/.config/rclone/gcp-oauth.env:600"
 )
 
 #==================================================#
@@ -90,6 +97,7 @@ install_secrets() {
             case "$src" in
                 # netrc carries the W&B API key, so it comes with wandb-settings
                 git/gitconfig.secret|config/huggingface/token|config/wandb/settings|config/netrc) ;;
+                config/rclone/rclone.conf|config/rclone/gcp-oauth.env) ;;
                 *) continue ;;
             esac
         fi
@@ -170,7 +178,7 @@ main() {
     case "${1:-}" in
         --core)
             SECRETS_PROFILE=core
-            echo '** Installing core secrets (git, Hugging Face, W&B, netrc)...'
+            echo '** Installing core secrets (git, Hugging Face, W&B, netrc, rclone)...'
             if fetch_secrets; then
                 install_secrets
             fi

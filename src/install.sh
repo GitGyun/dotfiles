@@ -92,6 +92,15 @@ install_minimal() {
     # user's SSH identity to reach the private repo.
     as_user bash "$DOT_DIR/src/install-secrets.sh" || true
 
+    # The secrets repo normally ships a ready rclone.conf. Only the first
+    # machine (or one whose token was revoked) needs the interactive OAuth
+    # flow -- point at it instead of blocking the install.
+    if command -v rclone >/dev/null 2>&1 \
+        && ! as_user rclone listremotes 2>/dev/null | grep -qx 'mydrive:'; then
+        echo "** No 'mydrive' rclone remote yet."
+        echo "**   Set it up once with: bash $DOT_DIR/src/setup-rclone-drive.sh"
+    fi
+
     echo
     echo '** [MINIMAL] Installing oh-my-zsh...'
     bash "$DOT_DIR/src/install-omz.sh"

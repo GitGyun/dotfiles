@@ -633,6 +633,32 @@ main() {
         log_skip "starship"
     fi
     install_by_script "bun" "https://bun.sh/install"
+    # rclone (Google Drive sync). Its own installer wants root and the distro
+    # package is too old for `config create --non-interactive`, which
+    # setup-rclone-drive.sh relies on -- so take the prebuilt binary.
+    if ! command -v rclone >/dev/null 2>&1; then
+        log_install "rclone" "github binary"
+        local rclone_arch="amd64"
+        [[ "$(uname -m)" =~ ^(aarch64|arm64)$ ]] && rclone_arch="arm64"
+        local rclone_os="linux"
+        [[ "$(uname -s)" == "Darwin" ]] && rclone_os="osx"
+        local rclone_ver="${VERSION_RCLONE:-current}"
+        local rclone_url="https://downloads.rclone.org/rclone-current-${rclone_os}-${rclone_arch}.zip"
+        [[ "$rclone_ver" != "current" ]] && rclone_url="https://downloads.rclone.org/${rclone_ver}/rclone-${rclone_ver}-${rclone_os}-${rclone_arch}.zip"
+        local rclone_tmp
+        rclone_tmp=$(mktemp -d)
+        if curl -sSfL "$rclone_url" -o "$rclone_tmp/rclone.zip" 2>/dev/null \
+            && unzip -q -o "$rclone_tmp/rclone.zip" -d "$rclone_tmp" 2>/dev/null; then
+            mkdir -p "$HOME/.local/bin"
+            install -m 755 "$rclone_tmp"/rclone-*/rclone "$HOME/.local/bin/rclone"
+            log_success "rclone" "github binary"
+        else
+            log_error "rclone" "github binary"
+        fi
+        rm -rf "$rclone_tmp"
+    else
+        log_skip "rclone"
+    fi
 
     log_section "Neovim"
     install_neovim

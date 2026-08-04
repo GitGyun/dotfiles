@@ -32,6 +32,9 @@ rm -rf "$HOME/.vim"
 # SSH
 rm -rf "$HOME/.ssh/config"
 
+# rclone (Drive remote + GCP OAuth client, installed from the secrets repo)
+rm -rf "$HOME/.config/rclone"
+
 # Misc
 rm -rf "$HOME/.Xmodmap"
 rm -rf "$HOME/.fzf"*

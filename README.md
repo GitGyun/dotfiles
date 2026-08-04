@@ -30,8 +30,28 @@ dotsecret                        # push local secrets to private repo
 ```
 
 Managed secrets: `~/.gitconfig.secret`, `~/.ssh/config`, `~/.netrc`, HuggingFace token,
-W&B settings, `gh`/`glab` tokens.
+W&B settings, rclone config.
 Repo layout and destinations are defined by `SECRET_MAP` in `src/install-secrets.sh`.
+
+### Google Drive (rclone)
+
+`rclone` is installed by every profile, and the secrets repo carries a ready
+`rclone.conf`, so `mydrive:` works on a new machine with no interaction.
+
+The one-time setup, needed only on the first machine or after the OAuth token
+is revoked:
+
+```bash
+bash src/setup-rclone-drive.sh            # prompts for the GCP OAuth client
+bash src/setup-rclone-drive.sh --status   # report only
+
+# headless machine: authorize on one that has a browser, then
+rclone authorize "drive" "<client id>" "<client secret>"
+bash src/setup-rclone-drive.sh --token '<the JSON it printed>'
+```
+
+It stores the GCP client id/secret in `~/.config/rclone/gcp-oauth.env` and
+offers to push both files to the secrets repo when done.
 
 ---
 

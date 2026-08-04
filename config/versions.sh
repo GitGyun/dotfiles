@@ -49,6 +49,10 @@ export VERSION_NEOVIM="${VERSION_NEOVIM:-v0.11.3}"
 export VERSION_LUA="${VERSION_LUA:-5.1.5}"
 export VERSION_LUAROCKS="${VERSION_LUAROCKS:-3.11.1}"
 export VERSION_NODE="${VERSION_NODE:-20}"  # Major version for NodeSource
+# "current" tracks the latest release; pin as e.g. v1.75.0. The distro package
+# lags far behind and older builds lack `config create --non-interactive`,
+# which setup-rclone-drive.sh depends on.
+export VERSION_RCLONE="${VERSION_RCLONE:-current}"
 
 #-------------------------------------------------#
 # Rust/Cargo Packages

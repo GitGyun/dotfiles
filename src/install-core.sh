@@ -60,6 +60,14 @@ echo '** [CORE] Installing selected secrets...'
 # user's SSH identity to reach the private repo.
 as_user bash "$DOT_DIR/src/install-secrets.sh" --core || true
 
+# The secrets repo normally ships a ready rclone.conf, so there is nothing to
+# do here. Only the first machine (or one whose token was revoked) needs the
+# interactive OAuth flow -- point at it instead of blocking the install.
+if ! as_user rclone listremotes 2>/dev/null | grep -qx 'mydrive:'; then
+    echo "** [CORE] No 'mydrive' rclone remote yet."
+    echo "**        Set it up once with: bash $DOT_DIR/src/setup-rclone-drive.sh"
+fi
+
 echo
 echo '** [CORE] Installing Oh My Zsh...'
 bash "$DOT_DIR/src/install-omz.sh"
