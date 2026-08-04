@@ -10,7 +10,9 @@ alias vimconflicts='vim $(git diff --name-only --diff-filter=U)'
 alias tmux='tmux -u'
 
 # Modern CLI replacements (guarded: the core profile installs only a subset)
-(( $+commands[eza] )) && alias ls='eza --icons'
+# `--icons` takes an optional WHEN value, so bare `--icons` swallows the first
+# positional arg (`ls outputs` -> "invalid value 'outputs' for --icons"). Pin it.
+(( $+commands[eza] )) && alias ls='eza --icons=auto'
 (( $+commands[duf] )) && alias df='duf'
 # Debian/Ubuntu universe ships bat as `batcat`; upstream builds keep the name `bat`
 (( $+commands[batcat] )) && alias bat='batcat'
