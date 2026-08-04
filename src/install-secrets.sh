@@ -32,18 +32,26 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # Secret file mapping
 # Format: "path_in_repo:destination:permissions"
 #
+# Layout of the secrets repo (paths mirror the destination structure):
+#   git/gitconfig.secret
+#   ssh/config
+#   config/{netrc,huggingface/token,wandb/settings}
+#
+# CLI auth tokens (gh, glab) are deliberately NOT synced: they cannot
+# bootstrap anything (they live inside the repo they grant access to),
+# and each machine should authenticate on its own.
+#
+# Entries whose source file is absent from the repo are skipped on
+# install, and picked up by --save once they exist locally.
+#
 # Add new secrets here:
 #==================================================#
 SECRET_MAP=(
     "git/gitconfig.secret:${HOME}/.gitconfig.secret:600"
     "ssh/config:${HOME}/.ssh/config:600"
-    "config/glab-cli/config.yml:${HOME}/.config/glab-cli/config.yml:600"
-    "config/gh/hosts.yml:${HOME}/.config/gh/hosts.yml:600"
-    "config/atuin/key:${HOME}/.local/share/atuin/key:600"
+    "config/netrc:${HOME}/.netrc:600"
     "config/huggingface/token:${HOME}/.cache/huggingface/token:600"
     "config/wandb/settings:${HOME}/.config/wandb/settings:600"
-    "config/netrc:${HOME}/.netrc:600"
-    "config/codeium/config.json:${HOME}/.cache/nvim/codeium/config.json:600"
 )
 
 #==================================================#
@@ -60,6 +68,7 @@ fetch_secrets() {
     else
         log_info "Cloning secrets from $SECRETS_REPO ..."
         if git clone --quiet "$SECRETS_REPO" "$SECRETS_DIR" 2>/dev/null; then
+            chmod 700 "$SECRETS_DIR"
             log_success "Secrets repository cloned"
         else
             log_warn "Could not clone secrets repository"
@@ -77,8 +86,20 @@ install_secrets() {
     local installed=0
     for entry in "${SECRET_MAP[@]}"; do
         IFS=':' read -r src dest perms <<< "$entry"
+        if [[ "${SECRETS_PROFILE:-full}" == "core" ]]; then
+            case "$src" in
+                # netrc carries the W&B API key, so it comes with wandb-settings
+                git/gitconfig.secret|config/huggingface/token|config/wandb/settings|config/netrc) ;;
+                *) continue ;;
+            esac
+        fi
         if [[ -f "$SECRETS_DIR/$src" ]]; then
-            mkdir -p "$(dirname "$dest")"
+            local dest_dir
+            dest_dir="$(dirname "$dest")"
+            mkdir -p "$dest_dir"
+            # Secret-only directories (~/.ssh, ~/.config/gh, ...) must not be
+            # group/world readable; never touch $HOME itself.
+            [[ "$dest_dir" != "$HOME" ]] && chmod 700 "$dest_dir"
             cp "$SECRETS_DIR/$src" "$dest"
             chmod "$perms" "$dest"
             log_success "Installed: $dest"
@@ -98,6 +119,7 @@ save_secrets() {
     if [[ ! -d "$SECRETS_DIR/.git" ]]; then
         log_info "Initializing secrets repository..."
         mkdir -p "$SECRETS_DIR"
+        chmod 700 "$SECRETS_DIR"
         git -C "$SECRETS_DIR" init --quiet
         git -C "$SECRETS_DIR" remote add origin "$SECRETS_REPO" 2>/dev/null || true
     fi
@@ -107,7 +129,10 @@ save_secrets() {
     for entry in "${SECRET_MAP[@]}"; do
         IFS=':' read -r src dest perms <<< "$entry"
         if [[ -f "$dest" ]]; then
-            mkdir -p "$SECRETS_DIR/$(dirname "$src")"
+            local src_dir
+            src_dir="$SECRETS_DIR/$(dirname "$src")"
+            mkdir -p "$src_dir"
+            chmod 700 "$src_dir"
             cp "$dest" "$SECRETS_DIR/$src"
             chmod "$perms" "$SECRETS_DIR/$src"
             log_success "Collected: $dest -> $src"
@@ -122,14 +147,13 @@ save_secrets() {
         return 1
     fi
 
-    # Commit and push
-    cd "$SECRETS_DIR"
-    git add -A
-    if git diff --cached --quiet 2>/dev/null; then
+    # Commit and push (git -C: never operate on the caller's cwd)
+    git -C "$SECRETS_DIR" add -A
+    if git -C "$SECRETS_DIR" diff --cached --quiet 2>/dev/null; then
         log_info "No changes to push"
     else
-        git commit --quiet -m "Update secrets $(date +%Y-%m-%d_%H:%M)"
-        if git push -u origin main 2>/dev/null || git push -u origin master 2>/dev/null; then
+        git -C "$SECRETS_DIR" commit --quiet -m "Update secrets $(date +%Y-%m-%d_%H:%M)"
+        if git -C "$SECRETS_DIR" push -u origin main 2>/dev/null || git -C "$SECRETS_DIR" push -u origin master 2>/dev/null; then
             log_success "Secrets pushed to $SECRETS_REPO"
         else
             log_error "Push failed. Make sure the remote repo exists and you have access."
@@ -144,6 +168,13 @@ save_secrets() {
 #==================================================#
 main() {
     case "${1:-}" in
+        --core)
+            SECRETS_PROFILE=core
+            echo '** Installing core secrets (git, Hugging Face, W&B, netrc)...'
+            if fetch_secrets; then
+                install_secrets
+            fi
+            ;;
         --save)
             echo '** Saving secrets to private repository...'
             save_secrets

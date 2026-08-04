@@ -1,6 +1,3 @@
-[include]
-    path = ~/.gitconfig.secret
-
 [alias]
     co = checkout
     cob = checkout -b
@@ -15,10 +12,6 @@
 
 [status]
     showUntrackedFiles = all
-
-[user]
-	name = GitGyun
-	email = kdgyun425@gmail.com
 
 [init]
 	defaultBranch = main
@@ -59,3 +52,10 @@
 
 [diff]
     colorMoved = default
+
+# Identity lives in the private secrets repo, never here.
+# Must stay last: git applies includes in file order, so anything
+# below this line would override the included values.
+# Installed by src/install-secrets.sh (gitconfig-secret -> ~/.gitconfig.secret).
+[include]
+    path = ~/.gitconfig.secret

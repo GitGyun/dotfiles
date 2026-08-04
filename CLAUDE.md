@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Personal dotfiles for Linux/macOS dev environments, focused on ML/DL workflows with GPU management. Manages zsh, neovim, tmux, git, and system package installation across three profiles: minimal, standard, and full.
+Personal dotfiles for Linux/macOS dev environments, focused on ML/DL workflows with GPU management. Manages zsh, neovim, tmux, git, and system package installation across four profiles: core (default), minimal, standard, and full.
 
 ## Key Commands
 
 ```bash
 # Install
-bash src/install.sh              # full profile (default)
+bash src/install.sh              # core profile (default)
+bash src/install.sh full         # everything
 bash src/install.sh standard     # without AI tools
 bash src/install.sh minimal      # zsh + nvim + git only
 
@@ -34,7 +35,7 @@ shfmt (indent=2, CI mode) and StyLua run on commit. Shell scripts use 2-space in
 
 - **`src/install.sh`** - Main entry point. Profiles are cumulative: `install_minimal` -> `install_standard` -> `install_full`. Creates symlinks from this repo into `$HOME`.
 - **`src/install-prerequisite.sh`** - System package installer with helpers (`install_by_apt`, `install_by_cargo`, `install_by_uv`, `install_by_script`). Detects Linux vs macOS and uses apt/cargo/uv or Homebrew accordingly. Includes DNS optimization with dnsmasq split DNS.
-- **`src/install-secrets.sh`** - Syncs secrets (gitconfig.secret, SSH config, gh/glab tokens, atuin key, HuggingFace token, wandb, netrc) with a private git repo. Secret mapping defined in `SECRET_MAP` array.
+- **`src/install-secrets.sh`** - Syncs secrets (gitconfig.secret, SSH config, netrc, HuggingFace token, wandb, gh/glab tokens) with a private git repo. Secret mapping defined in `SECRET_MAP` array; repo-side paths mirror the destination structure (`ssh/config`, `config/huggingface/token`, ...). Missing sources are skipped on install and collected by `--save` when present locally.
 - **`src/update.sh`** - Updater: pulls git, relinks symlinks, syncs neovim/tmux/zplug plugins. Stashes local changes before pull.
 - **`config/versions.sh`** - Central version pinning. Loads environment-specific overrides from `config/versions.d/{distro}-{version}.sh`. Local overrides go in `config/versions.d/local.sh` (gitignored).
 

@@ -9,7 +9,8 @@ Personal development environment for Linux and macOS. Based on [SeongwoongCho/do
 ```bash
 git clone git@github.com:GitGyun/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-bash src/install.sh              # full profile (default)
+bash src/install.sh              # core profile (default)
+bash src/install.sh full         # everything
 bash src/install.sh standard     # without AI tools
 bash src/install.sh minimal      # zsh + nvim + git only
 ```
@@ -28,7 +29,9 @@ dotup-full                       # + system packages
 dotsecret                        # push local secrets to private repo
 ```
 
-Managed secrets: `~/.gitconfig.secret`, `~/.ssh/config`, `~/.config/glab-cli/config.yml`
+Managed secrets: `~/.gitconfig.secret`, `~/.ssh/config`, `~/.netrc`, HuggingFace token,
+W&B settings, `gh`/`glab` tokens.
+Repo layout and destinations are defined by `SECRET_MAP` in `src/install-secrets.sh`.
 
 ---
 
@@ -36,8 +39,9 @@ Managed secrets: `~/.gitconfig.secret`, `~/.ssh/config`, `~/.config/glab-cli/con
 
 | Profile | What's Included |
 |---------|----------------|
+| **core** | apt-only Linux bootstrap: zsh + tmux + prebuilt neovim + modern CLI tools + AI CLIs (subset of nvim plugins) |
 | **minimal** | zsh + oh-my-zsh + zinit + starship + neovim + git + secrets |
-| **standard** | minimal + tmux + LSP servers + Codeium AI + plugins |
+| **standard** | minimal + tmux + LSP servers + plugins |
 | **full** | standard + Claude Code + oh-my-claudecode + LSP plugins |
 
 ---
@@ -101,7 +105,6 @@ Cross-shell prompt configured in `config/starship.toml`:
 | Tool | Replaces | Usage |
 |------|----------|-------|
 | **zoxide** | `cd` | `z <keyword>`, `zi` (interactive) |
-| **atuin** | `Ctrl+R` | Smart history search (SQLite, per-directory context) |
 | **eza** | `ls` | `ls`, aliased globally |
 | **bat** | `cat` | `bat`, aliased as `batcat` |
 | **fzf + fd** | `find` | Fuzzy file finding, `fuzzyvim` to open in nvim |
@@ -207,25 +210,24 @@ autoug
 
 ## Neovim
 
-Lazy.nvim plugin manager with full LSP, AI completion, and modern editing.
+Lazy.nvim plugin manager with full LSP and modern editing.
 
 ### Colorscheme
 
-**OceanicNext** (default). **Sonokai** (andromeda) available as alternative -- edit `nvim/lua/plugins/sonokai.lua` to enable.
+**Sonokai** (andromeda style, italic keywords) -- configured in `nvim/lua/plugins/sonokai.lua`.
 
 ### Plugins
 
 | Plugin | Purpose |
 |--------|---------|
 | **telescope** | Fuzzy finder (`Ctrl+P` files, `Ctrl+O` grep) |
-| **nvim-cmp** | Autocompletion (LSP + Codeium AI + snippets) |
+| **nvim-cmp** | Autocompletion (LSP + snippets) |
 | **treesitter** | Syntax highlighting |
 | **mason + mason-lspconfig** | LSP auto-installer (clangd, pylsp, jedi, lua_ls, bashls) |
 | **conform.nvim** | Format on save (black, shfmt, clang-format, stylua) |
 | **gitsigns** | Git diff in gutter + inline blame |
 | **nvim-tree** | File explorer (`"` to toggle) |
 | **barbar** | Buffer tabs (bubblegum theme) |
-| **codeium** | AI code completion |
 | **auto-session** | Automatic session save/restore |
 | **snacks.nvim** | Dashboard, indent guides, notifications |
 | **yanky** | Yank history (`<leader>p`) |
