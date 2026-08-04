@@ -20,6 +20,7 @@ rm -rf "$HOME/.tmux/statusbar.tmux"
 
 # Neovim
 rm -rf "$HOME/.config/nvim"
+rm -f "$HOME/.config/nvim-core-profile"
 rm -rf "$HOME/.local/share/nvim"
 rm -rf "$HOME/.local/state/nvim"
 rm -rf "$HOME/.cache/nvim"

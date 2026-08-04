@@ -11,14 +11,39 @@ if [[ -n "${SUDO_USER:-}" ]]; then
     export HOME
 fi
 
+# Only apt/system steps need root. Per-user tooling must run as the invoking
+# user: the Claude Code installer hard-refuses to run under sudo, which silently
+# skipped it -- and every `claude plugin install` after it -- on sudo installs.
+as_user() {
+    if [[ -z "${SUDO_USER:-}" || "$(id -u)" -ne 0 ]]; then
+        "$@"
+        return
+    fi
+    # Prefer runuser over `sudo -u`: sudo runs PAM account management for the
+    # target user and dies with "Account or password is expired" on images where
+    # the account has an expired/locked password. runuser skips that check.
+    local runuser_bin
+    runuser_bin=$(command -v runuser 2>/dev/null || echo /usr/sbin/runuser)
+    # /usr/bin/env by absolute path: the uv installer drops a `~/.local/bin/env`
+    # PATH-helper script that is meant to be sourced, and it shadows the real env
+    # for anything whose PATH starts with ~/.local/bin -- silently swallowing the
+    # command and exiting 0.
+    if [[ -x "$runuser_bin" ]]; then
+        "$runuser_bin" -u "$SUDO_USER" -- /usr/bin/env HOME="$HOME" PATH="$PATH" "$@"
+    else
+        sudo -u "$SUDO_USER" -H /usr/bin/env PATH="$PATH" "$@"
+    fi
+}
+
 #==================================================#
 # Installation Profiles:
+#   core     - essential shell/editor/tmux + AI tools (default)
 #   minimal  - zsh + nvim + git (basic dev environment)
 #   standard - minimal + tmux + LSP + plugins
-#   full     - standard + AI tools + all LSP plugins (default)
+#   full     - standard + AI tools + all LSP plugins
 #==================================================#
 
-PROFILE="${1:-full}"
+PROFILE="${1:-core}"
 DOT_DIR="$PWD"
 
 echo
@@ -47,9 +72,13 @@ install_minimal() {
     rm -rf "$HOME/.config/nvim"
     mkdir -p "$HOME/.config"
     ln -sfn "$DOT_DIR/nvim" "$HOME/.config/nvim"
+    # Drop the core marker so a core -> minimal/standard/full switch loads all plugins
+    rm -f "$HOME/.config/nvim-core-profile"
 
     # shell and git
-    ln -sf "$DOT_DIR/zsh/zsh.d" "$HOME/.zsh.d"
+    # -n: without it, re-running follows the existing ~/.zsh.d symlink and
+    # creates the link *inside* the repo (zsh/zsh.d/zsh.d).
+    ln -sfn "$DOT_DIR/zsh/zsh.d" "$HOME/.zsh.d"
     ln -sf "$DOT_DIR/git/gitconfig" "$HOME/.gitconfig"
     ln -sf "$DOT_DIR/zsh/zshrc" "$HOME/.zshrc"
     ln -sf "$DOT_DIR/zshenv" "$HOME/.zshenv"
@@ -58,7 +87,10 @@ install_minimal() {
     mkdir -p "$HOME/.ssh"
 
     # secrets (glab config, gitconfig.secret, ssh config, etc.)
-    bash "$DOT_DIR/src/install-secrets.sh" || true
+    # as_user: this git-clones and writes 0600 secrets into $HOME. As root those
+    # land root-owned and the user cannot read their own secrets; it also needs the
+    # user's SSH identity to reach the private repo.
+    as_user bash "$DOT_DIR/src/install-secrets.sh" || true
 
     echo
     echo '** [MINIMAL] Installing oh-my-zsh...'
@@ -88,13 +120,6 @@ install_standard() {
     echo '** [STANDARD] Installing LSP servers via Mason...'
     nvim --headless "+MasonInstall clangd" +qa || true
     nvim --headless "+TSUninstall python" -c "q" || true
-
-    echo
-    echo '** [STANDARD] Setting up Codeium cache...'
-    mkdir -p ~/.cache/nvim/codeium
-    chown -R "$(whoami):$(whoami)" ~/.cache/nvim/codeium
-    chmod -R 755 ~/.cache/nvim/codeium
-    echo '  Run :Codeium Auth in nvim to set up your API key.'
 }
 
 install_full() {
@@ -102,59 +127,69 @@ install_full() {
 
     echo
     echo '** [FULL] Updating npm to latest...'
-    npm install -g npm@latest || true
+    # npm's default global prefix (/usr/local) is not writable by the unprivileged
+    # user these installs run as. Own the convention here so `npm install -g` works
+    # without sudo on a fresh machine, and so zshrc's ~/.npm-global/bin PATH entry is
+    # correct by construction instead of relying on an ambient ~/.npmrc.
+    as_user mkdir -p "$HOME/.npm-global"
+    as_user npm config set prefix "$HOME/.npm-global"
+
+    # npm 12+ requires Node >= 22, so `npm@latest` only errors out on older Node
+    # and leaves the bundled npm in place anyway.
+    local node_major
+    node_major=$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)
+    if ((node_major >= 22)); then
+        as_user npm install -g npm@latest || true
+    else
+        echo "  Node ${node_major}: keeping the npm bundled with Node ($(npm --version 2>/dev/null || echo unknown))"
+    fi
 
     echo
     echo '** [FULL] Installing OpenAI Codex CLI...'
-    npm install -g @openai/codex || true
+    as_user npm install -g @openai/codex || true
 
     echo
     echo '** [FULL] Installing Claude Code...'
-    curl -fsSL https://claude.ai/install.sh | bash || true
-    export PATH="$HOME/.local/bin:$PATH"
+    as_user bash -c 'curl -fsSL https://claude.ai/install.sh | bash' || true
+    export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
 
     echo
     echo '** [FULL] Setting up oh-my-claudecode...'
-    npm install -g oh-my-claude-sisyphus
-    command claude plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode || true
-    command claude plugin install oh-my-claudecode || true
+    as_user npm install -g oh-my-claude-sisyphus || true
+    as_user claude plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode || true
+    as_user claude plugin install oh-my-claudecode || true
 
     # Use omc CLI for CLAUDE.md, HUD, and settings setup
     echo '** [FULL] Running omc update for OMC configuration...'
-    command omc update || true
+    as_user omc update || true
 
     echo
     echo '** [FULL] Installing Claude Code LSP plugins...'
-    command claude plugin marketplace add anthropics/claude-plugins-official || true
-    command claude plugin install typescript-lsp@claude-plugins-official || true
-    command claude plugin install pyright-lsp@claude-plugins-official || true
-    command claude plugin install gopls-lsp@claude-plugins-official || true
-    command claude plugin install rust-analyzer-lsp@claude-plugins-official || true
-    command claude plugin install clangd-lsp@claude-plugins-official || true
-    command claude plugin install lua-lsp@claude-plugins-official || true
-    command claude plugin install csharp-lsp@claude-plugins-official || true
-    command claude plugin install php-lsp@claude-plugins-official || true
-    command claude plugin install swift-lsp@claude-plugins-official || true
-    command claude plugin install jdtls-lsp@claude-plugins-official || true
+    as_user claude plugin marketplace add anthropics/claude-plugins-official || true
+    as_user claude plugin install typescript-lsp@claude-plugins-official || true
+    as_user claude plugin install pyright-lsp@claude-plugins-official || true
+    as_user claude plugin install gopls-lsp@claude-plugins-official || true
+    as_user claude plugin install rust-analyzer-lsp@claude-plugins-official || true
+    as_user claude plugin install clangd-lsp@claude-plugins-official || true
+    as_user claude plugin install lua-lsp@claude-plugins-official || true
+    as_user claude plugin install csharp-lsp@claude-plugins-official || true
+    as_user claude plugin install php-lsp@claude-plugins-official || true
+    as_user claude plugin install swift-lsp@claude-plugins-official || true
+    as_user claude plugin install jdtls-lsp@claude-plugins-official || true
 
     echo
     echo '** [FULL] Installing superpowers plugin...'
-    command claude plugin marketplace add obra/superpowers-marketplace || true
-    command claude plugin install superpowers@superpowers-marketplace || true
-
-    # C++ debug tools disabled (nvim-dap-ui not used)
-    # echo
-    # echo '** [FULL] Setting up C++ debug tools...'
-    # if [ -d "$HOME/cpptools-linux-x64" ]; then
-    #     ln -sf "$HOME/cpptools-linux-x64/extension/debugAdapters/bin/OpenDebugAD7" /usr/bin/OpenDebugAD7
-    #     chmod +x /usr/bin/OpenDebugAD7
-    # fi
+    as_user claude plugin marketplace add obra/superpowers-marketplace || true
+    as_user claude plugin install superpowers@superpowers-marketplace || true
 }
 
 #==================================================#
 # Main installation based on profile
 #==================================================#
 case "$PROFILE" in
+    core)
+        DOT_DIR="$DOT_DIR" bash "$DOT_DIR/src/install-core.sh"
+        ;;
     minimal)
         install_minimal
         ;;
@@ -166,7 +201,7 @@ case "$PROFILE" in
         ;;
     *)
         echo "Unknown profile: $PROFILE"
-        echo "Usage: $0 [minimal|standard|full]"
+        echo "Usage: $0 [core|minimal|standard|full]"
         exit 1
         ;;
 esac
@@ -194,7 +229,8 @@ if [[ -n "${SUDO_USER:-}" ]]; then
                "$HOME/.cargo" "$HOME/.local" "$HOME/.bun" \
                "$HOME/.bash_profile" "$HOME/.zshrc" "$HOME/.gitconfig" \
                "$HOME/.Xmodmap" "$HOME/.tmux.conf" "$HOME/.ssh" \
-               "$HOME/.jupyter"; do
+               "$HOME/.jupyter" "$HOME/.claude" "$HOME/.claude.json" \
+               "$HOME/.npm" "$HOME/.npm-global"; do
         [[ -e "$dir" ]] && chown -R "$SUDO_USER:$SUDO_GROUP" "$dir"
     done
 fi

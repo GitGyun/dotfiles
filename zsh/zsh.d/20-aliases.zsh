@@ -9,11 +9,12 @@ alias vimconflicts='vim $(git diff --name-only --diff-filter=U)'
 # Terminal multiplexer
 alias tmux='tmux -u'
 
-# Modern CLI replacements
-alias ls='eza --icons'
-alias df='duf'
-alias bat='batcat'
-if [[ $- == *i* ]]; then
+# Modern CLI replacements (guarded: the core profile installs only a subset)
+(( $+commands[eza] )) && alias ls='eza --icons'
+(( $+commands[duf] )) && alias df='duf'
+# Debian/Ubuntu universe ships bat as `batcat`; upstream builds keep the name `bat`
+(( $+commands[batcat] )) && alias bat='batcat'
+if [[ $- == *i* ]] && (( $+commands[zoxide] )); then
     alias cd='z'
 fi
 
