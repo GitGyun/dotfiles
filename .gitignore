@@ -28,3 +28,7 @@ config/versions.d/local.sh
 
 # glab config (managed by install-secrets.sh)
 config/glab-cli/
+
+# Patch/merge leftovers
+*.orig
+*.rej

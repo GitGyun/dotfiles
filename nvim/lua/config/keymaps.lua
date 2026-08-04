@@ -1,4 +1,4 @@
--- Set leader keys (The localleader is currently only used in debugger (nvim-dap-ui))
+-- Set leader keys
 vim.g.mapleader = ","
 vim.g.maplocalleader = "."
 
