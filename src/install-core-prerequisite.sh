@@ -60,11 +60,13 @@ case "$(uname -m)" in
         nvim_arch="x86_64"
         eza_arch="x86_64"
         rclone_arch="amd64"
+        gh_arch="amd64"
         ;;
     aarch64|arm64)
         nvim_arch="arm64"
         eza_arch="aarch64"
         rclone_arch="arm64"
+        gh_arch="arm64"
         ;;
     *)
         echo "Unsupported architecture: $(uname -m)" >&2
@@ -125,6 +127,31 @@ if command -v starship >/dev/null 2>&1; then
 else
     curl -sSfL https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin" \
         || echo '[WARN] starship installation failed' >&2
+fi
+
+# gh (GitHub CLI): needed *during* this install -- setup-github-auth.sh uses it
+# to authenticate before install-secrets.sh clones the private secrets repo.
+# Prebuilt rather than apt: Ubuntu 22.04 still ships gh 2.4.0 (2021).
+if command -v gh >/dev/null 2>&1 && [[ "$(command -v gh)" == "$HOME/.local/bin/gh" ]]; then
+    echo '** [CORE] gh already installed, skipping'
+else
+    gh_tag="${VERSION_GH:-latest}"
+    if [[ "$gh_tag" == "latest" ]]; then
+        gh_tag=$(curl -sSfL -o /dev/null -w '%{url_effective}' \
+            https://github.com/cli/cli/releases/latest 2>/dev/null | grep -oE 'v[0-9.]+$')
+    fi
+    if [[ -n "$gh_tag" ]]; then
+        # Archive nests the binary under gh_<version>_linux_<arch>/bin/gh
+        gh_url="https://github.com/cli/cli/releases/download/${gh_tag}/gh_${gh_tag#v}_linux_${gh_arch}.tar.gz"
+        if curl -fsSL "$gh_url" -o "$tmp_dir/gh.tar.gz" && tar -xzf "$tmp_dir/gh.tar.gz" -C "$tmp_dir"; then
+            install -m 755 "$tmp_dir"/gh_*/bin/gh "$HOME/.local/bin/gh"
+            echo "** [CORE] gh ${gh_tag} installed at $HOME/.local/bin/gh"
+        else
+            echo "[WARN] Could not download gh from $gh_url" >&2
+        fi
+    else
+        echo '[WARN] Could not resolve the latest gh release' >&2
+    fi
 fi
 
 # rclone (Google Drive sync): prebuilt binary, same reasoning as eza above.

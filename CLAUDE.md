@@ -52,6 +52,7 @@ Config files in this repo are symlinked into `$HOME`:
 
 Zsh sources files from `zsh/zsh.d/` in numeric order: `10-functions.zsh` (utility functions), `20-aliases.zsh` (aliases), `30-git.zsh` (git aliases/functions). The zshrc auto-reloads when these files change.
 
+- **`src/setup-github-auth.sh`** - Optional `gh auth login` prompt, run by install.sh/install-core.sh *before* `install-secrets.sh` so the private repo becomes reachable in the same run. Probes with `git ls-remote` rather than trusting `gh auth status`, and always exits 0. Skip with `DOTFILES_SKIP_GH_AUTH=1`.
 - **`src/setup-rclone-drive.sh`** - One-time setup of the `mydrive` Google Drive remote. Normally unnecessary: `install-secrets.sh` delivers a working `rclone.conf`. Handles both the browser flow and the headless `rclone authorize` handoff, and stores the GCP OAuth client in `~/.config/rclone/gcp-oauth.env`.
 
 ## Adding Secrets

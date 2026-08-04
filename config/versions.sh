@@ -53,6 +53,9 @@ export VERSION_NODE="${VERSION_NODE:-20}"  # Major version for NodeSource
 # lags far behind and older builds lack `config create --non-interactive`,
 # which setup-rclone-drive.sh depends on.
 export VERSION_RCLONE="${VERSION_RCLONE:-current}"
+# "latest" resolves through the GitHub releases redirect; pin as e.g. v2.97.0.
+# Not from apt: Ubuntu 22.04 still ships gh 2.4.0 (2021).
+export VERSION_GH="${VERSION_GH:-latest}"
 
 #-------------------------------------------------#
 # Rust/Cargo Packages

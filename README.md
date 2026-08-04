@@ -7,12 +7,31 @@ Personal development environment for Linux and macOS. Based on [SeongwoongCho/do
 ## Quick Start
 
 ```bash
-git clone git@github.com:GitGyun/dotfiles.git ~/.dotfiles
+# HTTPS, not SSH: this repo is public, so a brand new machine can clone it
+# before it has any credentials.
+git clone https://github.com/GitGyun/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-bash src/install.sh              # core profile (default)
-bash src/install.sh full         # everything
-bash src/install.sh standard     # without AI tools
-bash src/install.sh minimal      # zsh + nvim + git only
+
+sudo bash src/install.sh         # core profile (default)
+sudo bash src/install.sh full    # everything
+sudo bash src/install.sh standard # without AI tools
+sudo bash src/install.sh minimal # zsh + nvim + git only
+```
+
+`sudo` is required for the apt steps; per-user tooling is dropped back to the
+invoking user automatically.
+
+Partway through, the installer offers to run `gh auth login` (choose **SSH** as
+the git protocol). That is the only manual step: it registers this machine with
+GitHub so the same run can clone the private secrets repo and lay down your git
+identity, SSH config, tokens and Google Drive remote. Declining is fine — fetch
+them later with `bash src/install-secrets.sh`. Set `DOTFILES_SKIP_GH_AUTH=1` to
+never prompt.
+
+On the very first machine only, set up the Drive remote afterwards:
+
+```bash
+bash src/setup-rclone-drive.sh
 ```
 
 ### Existing Environment Update

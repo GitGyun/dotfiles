@@ -578,7 +578,7 @@ main() {
         unzip zip zsh ssh wget curl git htop rsync fzf
         tmux libevent-dev ncurses-dev bison locales chafa pkg-config build-essential libreadline-dev ripgrep fd-find
         clang-format clang clangd llvm libclang-dev libclang1 libomp-dev gdb
-        python3-venv bat duf jq gh glab mold
+        python3-venv bat duf jq glab mold
     )
     for pkg in "${apt_packages[@]}"; do
         install_by_apt "$pkg"
@@ -633,6 +633,35 @@ main() {
         log_skip "starship"
     fi
     install_by_script "bun" "https://bun.sh/install"
+    # gh (GitHub CLI): dropped from apt_packages because Ubuntu 22.04 ships
+    # gh 2.4.0 (2021), and setup-github-auth.sh drives `gh auth login` during
+    # the install itself.
+    if ! command -v gh >/dev/null 2>&1 || [[ "$(command -v gh)" != "$HOME/.local/bin/gh" ]]; then
+        log_install "gh" "github binary"
+        local gh_arch="amd64"
+        [[ "$(uname -m)" =~ ^(aarch64|arm64)$ ]] && gh_arch="arm64"
+        local gh_os="linux"
+        [[ "$(uname -s)" == "Darwin" ]] && gh_os="macOS"
+        local gh_tag="${VERSION_GH:-latest}"
+        if [[ "$gh_tag" == "latest" ]]; then
+            gh_tag=$(curl -sSfL -o /dev/null -w '%{url_effective}' \
+                https://github.com/cli/cli/releases/latest 2>/dev/null | grep -oE 'v[0-9.]+$')
+        fi
+        local gh_tmp
+        gh_tmp=$(mktemp -d)
+        if [[ -n "$gh_tag" ]] \
+            && curl -sSfL "https://github.com/cli/cli/releases/download/${gh_tag}/gh_${gh_tag#v}_${gh_os}_${gh_arch}.tar.gz" -o "$gh_tmp/gh.tar.gz" 2>/dev/null \
+            && tar -xzf "$gh_tmp/gh.tar.gz" -C "$gh_tmp" 2>/dev/null; then
+            mkdir -p "$HOME/.local/bin"
+            install -m 755 "$gh_tmp"/gh_*/bin/gh "$HOME/.local/bin/gh"
+            log_success "gh" "github binary"
+        else
+            log_error "gh" "github binary"
+        fi
+        rm -rf "$gh_tmp"
+    else
+        log_skip "gh"
+    fi
     # rclone (Google Drive sync). Its own installer wants root and the distro
     # package is too old for `config create --non-interactive`, which
     # setup-rclone-drive.sh relies on -- so take the prebuilt binary.

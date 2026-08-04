@@ -54,6 +54,12 @@ ln -sf "$DOT_DIR/zshenv" "$HOME/.zshenv"
 ln -sf "$DOT_DIR/config/starship.toml" "$HOME/.config/starship.toml"
 
 echo
+echo '** [CORE] Checking GitHub authentication...'
+# Before the secrets step, not after: this is what makes the private repo
+# reachable in this same run. Optional -- it never fails the install.
+as_user bash "$DOT_DIR/src/setup-github-auth.sh" || true
+
+echo
 echo '** [CORE] Installing selected secrets...'
 # as_user: this git-clones and writes 0600 secrets into $HOME. As root those
 # land root-owned and the user cannot read their own secrets; it also needs the

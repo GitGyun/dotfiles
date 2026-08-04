@@ -86,6 +86,10 @@ install_minimal() {
     ln -sf "$DOT_DIR/config/starship.toml" "$HOME/.config/starship.toml"
     mkdir -p "$HOME/.ssh"
 
+    # Before the secrets step, not after: this is what makes the private repo
+    # reachable in this same run. Optional -- it never fails the install.
+    as_user bash "$DOT_DIR/src/setup-github-auth.sh" || true
+
     # secrets (glab config, gitconfig.secret, ssh config, etc.)
     # as_user: this git-clones and writes 0600 secrets into $HOME. As root those
     # land root-owned and the user cannot read their own secrets; it also needs the
